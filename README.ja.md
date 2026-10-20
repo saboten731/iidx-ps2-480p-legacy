@@ -1,13 +1,18 @@
 # beatmania IIDX 3rd Style 480p patch v1.0
 
-PS2版『beatmania IIDX 3rd Style』の240行描画を垂直2倍して480pで出力する、非公式ファンパッチです。現在の対応対象は製品番号 `SLPM_650.06` のみです。将来は4th〜8thを各タイトルごとに解析・検証し、完成した順に追加する予定です。未完成のタイトルは対応対象ではありません。
+PS2版『beatmania IIDX 3rd Style』（製品番号 `SLPM_650.06`）向けの非公式ファンパッチです。v1.0ではゲーム本来の240行描画を垂直2倍して480pで出力します。後述の構成でPS2実機の動作確認済みです。
+
+## 対応状況
+
+- **3rd Style v1.0:** 本リポジトリで提供・サポートする唯一のパッチです。後述の[実機確認条件](#実機確認条件)で検証済みです。
+- **4th〜8th Style:** 各タイトルを個別に解析・検証したうえで、将来追加を検討します。現時点でパッチは含まれておらず、v1.0では未対応です。
 
 この方式はゲームをネイティブ640×480描画へ変更するものではありません。3rd Styleの240行描画をGSの表示回路で480ラインへ拡大します。9th以降のネイティブ480pパッチとは描画方式が異なります。
 
 ## 配布物
 
 - `patch480p.py`: ISO9660を検査し、元ISOを残して別ISOを書き出すPython 3パッチャー。
-- `IIDX03_SLPM-65006_480p_v1.0.xdelta`: 検証済み基準ISO専用のVCDIFF/xdelta3パッチです。GitHubでは対応するReleaseから入手してください。誤適用防止のため、ソースリポジトリでは管理せずRelease添付にします。
+- `IIDX03_SLPM-65006_480p_v1.0.xdelta`: 検証済み基準ISO専用のVCDIFF/xdelta3パッチです。[GitHub Releasesページ](https://github.com/saboten731/iidx-ps2-480p-legacy/releases)のv1.0 Release添付から入手してください。ソースリポジトリには含めていません。
 - `checksums.txt`: 基準ISO、出力ISO、xdelta、Python基準出力のSHA-256。
 
 ISO、ELF、IRX、BIOS、ゲーム素材は配布物に含めません。必ずご自身のディスクから吸い出したISOを使ってください。
@@ -29,7 +34,7 @@ PythonパッチャーはISO全体のSHA-256、総サイズ、ELFの固定セク�
 
 ## xdelta3で適用
 
-xdeltaは以下の検証済み基準ISO SHA-256に一致するISO専用です。Redump一致とは確認できていないため、その表記はしていません。
+[GitHub Releasesページ](https://github.com/saboten731/iidx-ps2-480p-legacy/releases)から `IIDX03_SLPM-65006_480p_v1.0.xdelta` をダウンロードしてください。xdeltaは以下の検証済み基準ISO SHA-256に一致するISO専用です。Redump一致とは確認できていないため、その表記はしていません。
 
 ```text
 SLPM_650.06.Beatmania IIDX 3rd Style.iso
@@ -82,7 +87,7 @@ python patch480p.py "SLPM_650.06.Beatmania IIDX 3rd Style.iso" `
 
 ## ライセンス
 
-このプロジェクト自身のソースコードライセンスは、作者による選定待ちです。上流リポジトリのMITライセンスを本プロジェクトへ適用していません。`LICENSE` が確定するまで、ソースコードを公開・再配布しないでください。
+このプロジェクトのオリジナルソースコードとドキュメントはMIT Licenseで公開しています。全文は [LICENSE](LICENSE) を参照してください。このライセンスはKonamiのゲーム、ゲーム素材、商標の権利を許諾するものではありません。本リポジトリおよびReleaseにゲームデータは含みません。
 
 ## 非公式表記
 

@@ -1,13 +1,18 @@
 # beatmania IIDX 3rd Style 480p Patch v1.0
 
-An unofficial fan patch that takes the PlayStation 2 release of *beatmania IIDX 3rd Style* from 240-line rendering to 480p output by vertically doubling the existing 240-line image. The current supported title is product code `SLPM_650.06`. Styles 4th through 8th may be added individually after their own analysis and validation; unfinished titles are not supported.
+An unofficial fan patch for the PlayStation 2 release of *beatmania IIDX 3rd Style*, product code `SLPM_650.06`. Version 1.0 vertically doubles the game's existing 240-line image for 480p output and has been tested on a physical PS2 in the setup described below.
+
+## Release scope
+
+- **3rd Style v1.0:** the only patch included and supported here; hardware-tested as described in [Hardware verification](#hardware-verification).
+- **4th–8th Style:** planned for separate, title-specific analysis and validation. No patches for these Styles are included or supported by v1.0.
 
 This does not convert the game to native 640×480 rendering. The patch uses the GS display circuit to double the game's 240 rendered lines to 480 output lines. This is different from the native 480p rendering path used by patches for Style 9th and later.
 
 ## Files
 
 - `patch480p.py`: a Python 3 patcher that inspects an ISO9660 image and writes a separate output ISO.
-- `IIDX03_SLPM-65006_480p_v1.0.xdelta`: a VCDIFF/xdelta3 patch for the verified reference ISO. Download it from the matching GitHub Release. It is excluded from the source repository and distributed as a Release asset to prevent accidental misuse.
+- `IIDX03_SLPM-65006_480p_v1.0.xdelta`: a VCDIFF/xdelta3 patch for the verified reference ISO. Download it from the [GitHub Releases page](https://github.com/saboten731/iidx-ps2-480p-legacy/releases), attached to the v1.0 Release. It is not stored in the source repository.
 - `checksums.txt`: SHA-256 values for the reference ISO, patched ISO, xdelta patch, and Python output from the reference ISO.
 
 No ISO, ELF, IRX, BIOS, or game assets are included. Use an ISO dumped from your own disc.
@@ -29,7 +34,7 @@ A rebuilt ISO may still have boot or compatibility issues even when its ELF matc
 
 ## Apply the xdelta patch
 
-The xdelta patch is for the following verified reference image only. We have not verified that this image matches Redump, so no Redump claim is made.
+Download `IIDX03_SLPM-65006_480p_v1.0.xdelta` from the [GitHub Releases page](https://github.com/saboten731/iidx-ps2-480p-legacy/releases) and select the v1.0 Release. The patch is for the following verified reference image only. We have not verified that this image matches Redump, so no Redump claim is made.
 
 ```text
 SLPM_650.06.Beatmania IIDX 3rd Style.iso
@@ -76,7 +81,7 @@ The distribution layout was informed by [blurtic2/iidx-ps2-480p](https://github.
 
 ## License
 
-The author has not yet selected a license for this project's source code. The upstream repository's MIT license does not apply to this project. Do not publish or redistribute the source until the author replaces the `LICENSE` placeholder with a chosen license.
+This project's original source code and documentation are licensed under the MIT License; see [LICENSE](LICENSE). This license does not grant rights to Konami's game, game assets, or trademarks. No game data are included in this repository or Release.
 
 ## Unofficial notice
 

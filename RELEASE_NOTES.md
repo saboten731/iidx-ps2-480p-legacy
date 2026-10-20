@@ -1,24 +1,29 @@
-# IIDX 3rd Style 480p Patch v1.0 (Draft)
+# IIDX 3rd Style 480p Patch v1.0
 
-This draft release contains the v1.0 patch for the PlayStation 2 version of beatmania IIDX 3rd Style, product code `SLPM_650.06`.
+Version 1.0 is the hardware-tested 480p patch for the PlayStation 2 release of *beatmania IIDX 3rd Style*, product code `SLPM_650.06`. It vertically doubles the existing 240-line image through the GS display circuit; it does not convert the game to native 640×480 rendering.
 
-## What it does
+## Included patch
 
-- Vertically doubles the game's existing 240-line image to produce 480p output. It does not change the game to native 640x480 rendering.
-- Uses `DISPLAY=0x001DF4FF0882B138` and the verified video synchronization configuration `SYNCV=0x00C7900001E00006` (`VDP=484`).
-- Preserves runtime BIOS/OSD color selection and the game's PMODE restoration path.
-- Does not add audio, chart-timer, or judgement compensation.
+- `patch480p.py`: Python 3 patcher that validates the BOOT2 ELF and writes a separate ISO.
+- `IIDX03_SLPM-65006_480p_v1.0.xdelta`: xdelta3 patch for the verified reference ISO. Download this asset from the [GitHub Releases page](https://github.com/saboten731/iidx-ps2-480p-legacy/releases), attached to v1.0.
+- `checksums.txt`: SHA-256 values for the reference ISO, patched ISO, xdelta patch, and Python patcher output.
+
+No ISO, ELF, BIOS, IRX, or game assets are included. The xdelta patch must only be used with the exact reference ISO identified by the SHA-256 in `checksums.txt`.
+
+## Patch details
+
+- Display: `DISPLAY=0x001DF4FF0882B138` (240 rendered lines doubled to 480 output lines).
+- Video synchronization: `SYNCV=0x00C7900001E00006` (`VDP=484`).
+- Runtime BIOS/OSD color selection and the game's PMODE restoration path are preserved.
+- No audio pitch, chart-timer, or judgement compensation is added.
 
 ## Compatibility and verification
 
-- Supported title: 3rd Style, `SLPM_650.06` only. Other Styles are not supported by this release.
-- The xdelta asset applies only to the verified reference ISO whose SHA-256 is recorded in `checksums.txt`.
-- The Python patcher accepts only an allowlisted original BOOT2 ELF and writes a separate ISO.
-- Hardware testing was reported by the user on a physical PS2 with OPL, MX4SIO, a directly connected component-input TV, and GSM OFF. The title, HOW TO PLAY, song selection, gameplay, judgement, and extended operation were checked.
-- No ISO, ELF, BIOS, IRX, or other game data is included.
+- v1.0 supports 3rd Style `SLPM_650.06` only. Styles 4th–8th are planned for separate analysis and validation; they are not included or supported by this release.
+- The Python patcher accepts only the supported original BOOT2 ELF and creates a new ISO without modifying the source image.
+- The user reports testing on a physical PS2 with OPL, MX4SIO, a directly connected component-input television, and GSM OFF. The title, HOW TO PLAY, song selection, gameplay, key judgement, and extended operation were checked. This result applies to that setup.
+- See `README.md`, `README.ja.md`, and `checksums.txt` for application steps, supported hashes, and limitations.
 
-See `README.md`, `README.ja.md`, and `checksums.txt` for application instructions, limitations, and hashes.
+## License and notice
 
-## Draft status
-
-The project's source license has not yet been selected. This release remains a draft pending review of the license, bilingual notes, README, and attached xdelta hash. This is an unofficial fan project and is not endorsed by Konami.
+The project's original source code and documentation are licensed under the MIT License; see `LICENSE`. No game data are included. This is an unofficial fan patch and is not endorsed or supported by Konami.
