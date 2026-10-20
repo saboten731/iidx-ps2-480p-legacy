@@ -1,88 +1,70 @@
-# beatmania IIDX 3rd Style 480p Patch v1.0
+# beatmania IIDX 3rd style — 480p Patch
 
-An unofficial fan patch for the PlayStation 2 release of *beatmania IIDX 3rd Style*, product code `SLPM_650.06`. Version 1.0 vertically doubles the game's existing 240-line image for 480p output and has been tested on a physical PS2 in the setup described below.
+**English** | [日本語](README.ja.md)
 
-## Release scope
+An unofficial patch that enables **480p video output** for the PlayStation 2 version of *beatmania IIDX 3rd style* on real PS2 hardware.
 
-- **3rd Style v1.0:** the only patch included and supported here; hardware-tested as described in [Hardware verification](#hardware-verification).
-- **4th–8th Style:** planned for separate, title-specific analysis and validation. No patches for these Styles are included or supported by v1.0.
+It doubles the game's existing 240-line image vertically for 480p output, with adjustments to display positioning and video timing. **Song selection and gameplay have been tested on a physical PS2.**
 
-This does not convert the game to native 640×480 rendering. The patch uses the GS display circuit to double the game's 240 rendered lines to 480 output lines. This is different from the native 480p rendering path used by patches for Style 9th and later.
+> **About image quality:** This is 480p output, not a conversion to native 640×480 rendering. It uses a different approach from the native 480p patches for 9th style and later.
 
-## Files
+## Supported games
 
-- `patch480p.py`: a Python 3 patcher that inspects an ISO9660 image and writes a separate output ISO.
-- `IIDX03_SLPM-65006_480p_v1.0.xdelta`: a VCDIFF/xdelta3 patch for the verified reference ISO. Download it from the [GitHub Releases page](https://github.com/saboten731/iidx-ps2-480p-legacy/releases), attached to the v1.0 Release. It is not stored in the source repository.
-- `checksums.txt`: SHA-256 values for the reference ISO, patched ISO, xdelta patch, and Python output from the reference ISO.
+- **beatmania IIDX 3rd style (PS2)** — Supported and hardware-tested in v1.0.
+- **4th–8th style** — Not supported yet. Additional games are planned as they are completed and verified.
 
-No ISO, ELF, IRX, BIOS, or game assets are included. Use an ISO dumped from your own disc.
+## How to apply
 
-Before patching, keep a backup of the source ISO and record its SHA-256 for comparison with `checksums.txt`. The Python patcher leaves the source unchanged and writes a new output file.
+Create an ISO from a disc you own. There are two ways to apply the patch: **xdelta** or **Python**. You only need one of them.
 
-## Supported revision
+### Option 1: xdelta (recommended)
 
-The Python patcher reads `BOOT2` from `SYSTEM.CNF`, locates the executable in the ISO9660 directory tree, and verifies product code `SLPM_650.06` plus the exact hash of the unmodified executable:
+1. Download [`IIDX03_480p_v1.0.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.0/IIDX03_480p_v1.0.xdelta) from [Releases](https://github.com/saboten731/iidx-ps2-480p-legacy/releases).
+2. Check that your original ISO's SHA-256 matches the **reference ISO** listed in the release's [`checksums.txt`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.0/checksums.txt).
+3. Apply the patch with an xdelta-compatible tool such as Delta Patcher.
 
-```text
-Supported original BOOT2 ELF SHA-256:
-CD2EE5A1C50C46808927EF32A7FE8F5791AE66399DA029A75D5095CA70499321
+The xdelta file works **only with that exact reference ISO**. If your ISO has a different hash, use the Python patcher below instead.
+
+Command-line example (xdelta3):
+
+```sh
+xdelta3 -d -s "beatmania IIDX 3rd style.iso" "IIDX03_480p_v1.0.xdelta" "beatmania IIDX 3rd style_480p.iso"
 ```
 
-The Python patcher does not require a fixed whole-ISO SHA-256, total size, or executable sector. It accepts a different ISO hash when the dynamically located BOOT2 ELF matches the supported SHA-256 exactly. Unknown, modified, or recognized already-patched ELFs are rejected before an output is created. It never applies a patch based on a partial instruction match.
+The ISO filename is just an example; substitute the name of your own file.
 
-A rebuilt ISO may still have boot or compatibility issues even when its ELF matches. The patcher preserves every input byte outside the explicitly allowed ELF ranges and verifies that with a chunked comparison.
+### Option 2: Python (for ISOs with different hashes)
 
-## Apply the xdelta patch
+Download `patch480p.py` from the [repository](https://github.com/saboten731/iidx-ps2-480p-legacy). Requires Python 3.8 or later; no third-party packages are needed.
 
-Download `IIDX03_SLPM-65006_480p_v1.0.xdelta` from the [GitHub Releases page](https://github.com/saboten731/iidx-ps2-480p-legacy/releases) and select the v1.0 Release. The patch is for the following verified reference image only. We have not verified that this image matches Redump, so no Redump claim is made.
-
-```text
-SLPM_650.06.Beatmania IIDX 3rd Style.iso
-Size:   3,810,918,400 bytes
-SHA256: D7E11CD70100675A97DDD9027D1578BDA1397959FA1562151BA9C9E7F94E16D1
+```sh
+python patch480p.py "beatmania IIDX 3rd style.iso"
 ```
 
-Install `xdelta3`, make sure the output path does not exist, then run:
+The script leaves your original ISO untouched and creates a new file with `_480p_v1.0` added to its name. Use `--output` to choose a different output path.
 
-```powershell
-xdelta3 -d -s "SLPM_650.06.Beatmania IIDX 3rd Style.iso" `
-  "IIDX03_SLPM-65006_480p_v1.0.xdelta" `
-  "SLPM_650.06.Beatmania IIDX 3rd Style_480p_v1.0.iso"
-```
+The Python patcher can handle an ISO with a different overall hash **if its game executable is an exact match for the supported, unmodified version**. Other revisions and modified executables are rejected. This does not guarantee compatibility with every rebuilt ISO.
 
-Verify that the resulting ISO SHA-256 matches the patched-image value in `checksums.txt`. Do not use this xdelta patch if the source image hash differs.
+## Using it on a PS2
 
-## Apply the Python patch
+- You need a **480p-capable display** and a connection that supports 480p. Hardware testing used a component (D-terminal) connection.
+- **Disable GSM video-mode forcing.** The patch configures 480p output from within the game.
+- Video color output follows the PS2 system's **RGB/component setting**; the patch does not detect the connected cable. RGB output has not been tested on real hardware.
 
-Requires Python 3.8 or newer. The input ISO is not modified. By default, the patcher adds `_480p_v1.0.iso` to the input filename. If the output already exists, it stops without overwriting it.
+Testing was performed on a physical PS2 using OPL and MX4SIO, connected directly to a component-input TV with GSM disabled. The title screen, HOW TO PLAY, song selection, gameplay, key judgments, and extended operation were checked. Other displays and boot methods may behave differently.
 
-```powershell
-python patch480p.py "SLPM_650.06.Beatmania IIDX 3rd Style.iso" `
-  --output "SLPM_650.06.Beatmania IIDX 3rd Style_480p_v1.0.iso"
-```
+## Notes
 
-The patcher reads the `BOOT2` path from `SYSTEM.CNF` and uses the ELF extent found in the ISO. The whole-ISO SHA-256 and size are not acceptance conditions. At completion it prints input/output hashes, output size, and the patched ELF hash.
+- **No ISO or game data are distributed.** You must supply an ISO made from your own game disc.
+- The patch changes video output; it does not modify music data, charts, or judgment logic.
+- Allow enough free disk space for another full-size ISO. Keep your original ISO and refer to `checksums.txt` to verify the reference ISO and patched output. The output hash may differ when patching a supported ISO with different contents outside the game executable.
 
-## v1.0 patch details
+## Acknowledgments
 
-- Display: `DISPLAY=0x001DF4FF0882B138` (240 rendered lines doubled to 480 output lines).
-- Video synchronization configuration: `SYNCV=0x00C7900001E00006` (`VDP=484`).
-- RGB/component selection: preserves the existing runtime path that reads the BIOS/OSD setting. Behavior with untested OSD and display settings is not guaranteed.
-- PMODE: does not read PMODE back from the GS; the game's original display-environment path restores it.
-- No changes to SPU/IOP, audio pitch, chart timer, or judgement processing.
+The distribution format was inspired by [blurtic2/iidx-ps2-480p](https://github.com/blurtic2/iidx-ps2-480p). This patch is a separate implementation for 3rd style.
 
-## Hardware verification
+## License and disclaimer
 
-The user reports successful testing on a physical PS2 connected directly to a component-input television, using OPL and MX4SIO with GSM OFF. The user verified the title, HOW TO PLAY, song selection, actual play, key judgement, and extended operation. This result applies to that setup only; other televisions, OSD output settings, and boot methods are not guaranteed.
+The patch software and project documentation are released under the [MIT License](LICENSE). All rights to the original game, its assets, and its trademarks remain with their respective owners.
 
-## Prior work
-
-The distribution layout was informed by [blurtic2/iidx-ps2-480p](https://github.com/blurtic2/iidx-ps2-480p). That project primarily targets native 480p rendering in Styles 9th–16th; this 3rd Style patch uses a different title and display path. No patch code from that repository is included here.
-
-## License
-
-This project's original source code and documentation are licensed under the MIT License; see [LICENSE](LICENSE). This license does not grant rights to Konami's game, game assets, or trademarks. No game data are included in this repository or Release.
-
-## Unofficial notice
-
-This is an unofficial fan patch and is not an official Konami product. It is not endorsed or supported by Konami. Own the game and ensure that applying the patch is permitted by applicable law and local rules.
+This is an unofficial patch and is neither endorsed nor supported by KONAMI.

@@ -1,29 +1,28 @@
-# IIDX 3rd Style 480p Patch v1.0
+# beatmania IIDX 3rd style — 480pパッチ v1.0
 
-v1.0は、PlayStation 2版『beatmania IIDX 3rd Style』（製品番号 `SLPM_650.06`）向けの実機検証済み480pパッチです。GSの表示回路で既存の240行画像を垂直2倍して出力します。ネイティブ640×480描画へ変更するものではありません。
+PlayStation 2版『beatmania IIDX 3rd style』向け480pパッチの初回リリースです。
 
-## パッチ内容
+### 主な変更点
 
-- `patch480p.py`: BOOT2 ELFを検証し、別ISOへ書き出すPython 3パッチャー。
-- `IIDX03_SLPM-65006_480p_v1.0.xdelta`: 検証済み基準ISO用のxdelta3パッチです。[GitHub Releasesページ](https://github.com/saboten731/iidx-ps2-480p-legacy/releases)のv1.0 Release添付から入手してください。
-- `checksums.txt`: 基準ISO、出力ISO、xdelta、Pythonパッチ出力のSHA-256。
+- ゲーム本来の240行の画面を縦方向に2倍し、**480pで映像出力**します。
+- 表示位置と映像の同期を調整し、**PS2実機で音楽・譜面のズレが生じないことを確認**しました。
+- PS2本体のRGB／コンポーネント設定に合わせて色出力を切り替えます。
 
-ISO、ELF、BIOS、IRX、ゲーム素材は含みません。xdeltaは `checksums.txt` 記載のSHA-256に一致する基準ISOだけに適用してください。
+※ ゲームの描画そのものをネイティブ640×480に変更するものではありません。
 
-## パッチの詳細
+### ダウンロードと適用
 
-- 描画: `DISPLAY=0x001DF4FF0882B138`（240行を縦2倍し、480出力ライン）。
-- 映像同期: `SYNCV=0x00C7900001E00006`（`VDP=484`）。
-- BIOS/OSDに基づく実行時の色選択と、ゲーム本来のPMODE復旧経路を維持します。
-- 音声ピッチ、譜面タイマー、判定処理への補正は追加していません。
+| ファイル | 用途 |
+|---|---|
+| [`IIDX03_480p_v1.0.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.0/IIDX03_480p_v1.0.xdelta) | 基準ISO用パッチ。通常はこちらを使用してください。 |
+| [`checksums.txt`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.0/checksums.txt) | 元ISOと適用後ISOの確認用ハッシュ。 |
 
-## 対応と検証
+元ISOのハッシュが異なる場合は、[リポジトリの `patch480p.py`](https://github.com/saboten731/iidx-ps2-480p-legacy) も利用できます（対応する未改変のゲーム実行ファイルが必要です）。
 
-- v1.0の対応は3rd Style `SLPM_650.06` のみです。4th〜8th Styleは今後個別に解析・検証する予定で、このリリースには含まれず未対応です。
-- Pythonパッチャーは対応する未改変BOOT2 ELFだけを受け付け、元ISOを変更せず新しいISOを作成します。
-- ユーザー報告による実機確認環境は、PS2実機、OPL、MX4SIO、コンポーネント入力テレビ直結、GSM OFFです。タイトル、HOW TO PLAY、選曲、プレイ、打鍵判定、長時間動作が確認されています。この結果は同構成に対するものです。
-- 適用手順、対応ハッシュ、制約は `README.ja.md`、`README.md`、`checksums.txt` を参照してください。
+### 動作確認・注意事項
 
-## ライセンスと表記
+PS2実機で、タイトル画面・HOW TO PLAY・選曲・演奏・打鍵判定・長時間動作を確認済みです。確認環境はOPL／MX4SIO、D端子接続、**GSM OFF**。RGB接続での実機動作は未確認です。
 
-プロジェクトのオリジナルソースコードとドキュメントはMIT Licenseで公開しています。全文は `LICENSE` を参照してください。ゲームデータは含みません。本パッチは非公式ファンパッチであり、Konamiの承認または支援を受けていません。
+**対応は3rd styleのみ**です。4th〜8th styleは現時点では未対応です。
+
+パッチ適用方法と動作条件は [日本語README](https://github.com/saboten731/iidx-ps2-480p-legacy/blob/main/README.ja.md) を参照してください。**ゲーム本体やISOは含まれません。** 本パッチは非公式であり、KONAMIから承認・支援を受けていません。

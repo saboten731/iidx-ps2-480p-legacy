@@ -1,94 +1,70 @@
-# beatmania IIDX 3rd Style 480p patch v1.0
+# beatmania IIDX 3rd style — 480pパッチ
 
-PS2版『beatmania IIDX 3rd Style』（製品番号 `SLPM_650.06`）向けの非公式ファンパッチです。v1.0ではゲーム本来の240行描画を垂直2倍して480pで出力します。後述の構成でPS2実機の動作確認済みです。
+[English](README.md) | **日本語**
 
-## 対応状況
+PlayStation 2版『beatmania IIDX 3rd style』を、PS2実機から**480pで映像出力**する非公式パッチです。
 
-- **3rd Style v1.0:** 本リポジトリで提供・サポートする唯一のパッチです。後述の[実機確認条件](#実機確認条件)で検証済みです。
-- **4th〜8th Style:** 各タイトルを個別に解析・検証したうえで、将来追加を検討します。現時点でパッチは含まれておらず、v1.0では未対応です。
+ゲーム本来の240行の画面を縦方向に2倍して出力し、480p化に伴う画面表示や音楽との同期も調整しています。**選曲から実際の演奏まで、PS2実機で動作確認済み**です。
 
-この方式はゲームをネイティブ640×480描画へ変更するものではありません。3rd Styleの240行描画をGSの表示回路で480ラインへ拡大します。9th以降のネイティブ480pパッチとは描画方式が異なります。
+> **画質について：** 出力は480pになりますが、ゲームの描画そのものを640×480に高精細化するパッチではありません。9th style以降を対象としたネイティブ480pパッチとは方式が異なります。
 
-## 配布物
+## 対応ソフト
 
-- `patch480p.py`: ISO9660を検査し、元ISOを残して別ISOを書き出すPython 3パッチャー。
-- `IIDX03_SLPM-65006_480p_v1.0.xdelta`: 検証済み基準ISO専用のVCDIFF/xdelta3パッチです。[GitHub Releasesページ](https://github.com/saboten731/iidx-ps2-480p-legacy/releases)のv1.0 Release添付から入手してください。ソースリポジトリには含めていません。
-- `checksums.txt`: 基準ISO、出力ISO、xdelta、Python基準出力のSHA-256。
+- **beatmania IIDX 3rd style（PS2版）** — v1.0対応・実機確認済み
+- **4th〜8th style** — 現時点では未対応。各作品の検証が完了したものから追加予定です。
 
-ISO、ELF、IRX、BIOS、ゲーム素材は配布物に含めません。必ずご自身のディスクから吸い出したISOを使ってください。
+## 適用方法
 
-適用前に元ISOのバックアップを作り、`checksums.txt` と照合できるようSHA-256を記録してください。パッチャーは元ISOを変更せず、新しい出力ファイルを作ります。
+ご自身で所有するディスクから作成したISOを用意してください。適用方法は**xdelta**と**Python**の2種類です。どちらか一方を使用します。
 
-## 対応版
+### 方法1：xdelta（推奨）
 
-`SYSTEM.CNF` の `BOOT2` から実行ELFを特定し、製品番号 `SLPM_650.06` と未改変ELFのSHA-256を検証します。
+1. [Releases](https://github.com/saboten731/iidx-ps2-480p-legacy/releases)から [`IIDX03_480p_v1.0.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.0/IIDX03_480p_v1.0.xdelta) をダウンロードします。
+2. 元ISOのSHA-256が、配布されている [`checksums.txt`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.0/checksums.txt) の**基準ISO**と一致することを確認します。
+3. Delta Patcherなどのxdelta対応ツールで、元ISOにパッチを適用します。
 
-```text
-Supported original BOOT2 ELF SHA-256:
-CD2EE5A1C50C46808927EF32A7FE8F5791AE66399DA029A75D5095CA70499321
+xdeltaは**指定された基準ISO専用**です。ハッシュが異なるISOには使用せず、下記のPython版を試してください。
+
+コマンドラインで適用する場合（xdelta3）：
+
+```sh
+xdelta3 -d -s "beatmania IIDX 3rd style.iso" "IIDX03_480p_v1.0.xdelta" "beatmania IIDX 3rd style_480p.iso"
 ```
 
-PythonパッチャーはISO全体のSHA-256、総サイズ、ELFの固定セクタ位置を要求しません。ISO全体のハッシュが基準ISOと異なっていても、ISO9660から検出したBOOT2 ELFが上記SHA-256と完全一致すれば適用できます。ELFが異なる、改変済み、または既知のパッチ済みであれば出力を作らず停止します。命令の一部一致だけでは適用しません。
+※ ISOのファイル名は一例です。手元のファイル名に読み替えてください。
 
-再構築ISOは、ELFが一致しても起動や他の変更との互換性を保証できません。入力ISO内の許可されたELF領域以外は一切変更せず、適用後にもチャンク比較で確認します。
+### 方法2：Python（ISOのハッシュが異なる場合）
 
-## xdelta3で適用
+[リポジトリ](https://github.com/saboten731/iidx-ps2-480p-legacy)の `patch480p.py` とPython 3.8以降を使用します。追加ライブラリは不要です。
 
-[GitHub Releasesページ](https://github.com/saboten731/iidx-ps2-480p-legacy/releases)から `IIDX03_SLPM-65006_480p_v1.0.xdelta` をダウンロードしてください。xdeltaは以下の検証済み基準ISO SHA-256に一致するISO専用です。Redump一致とは確認できていないため、その表記はしていません。
-
-```text
-SLPM_650.06.Beatmania IIDX 3rd Style.iso
-Size:   3,810,918,400 bytes
-SHA256: D7E11CD70100675A97DDD9027D1578BDA1397959FA1562151BA9C9E7F94E16D1
+```sh
+python patch480p.py "beatmania IIDX 3rd style.iso"
 ```
 
-`xdelta3` を用意し、出力先がまだ存在しないことを確認してから適用します。
+元ISOは書き換えず、末尾に `_480p_v1.0` を付けた新しいISOを作成します。出力先を指定したい場合は `--output` を使用できます。
 
-```powershell
-xdelta3 -d -s "SLPM_650.06.Beatmania IIDX 3rd Style.iso" `
-  "IIDX03_SLPM-65006_480p_v1.0.xdelta" `
-  "SLPM_650.06.Beatmania IIDX 3rd Style_480p_v1.0.iso"
-```
+Python版はISO全体のハッシュが異なっていても、**ゲームの実行ファイルが対応済みの未改変版と一致する場合**に適用できます。別バージョンや改造済みの実行ファイルには適用しません。あらゆるISOでの動作を保証するものではありません。
 
-生成ISOのSHA-256が `checksums.txt` の出力値と一致することを確認してください。元ISOのハッシュが一致しない場合はxdeltaを適用しないでください。
+## PS2実機で使うとき
 
-## Pythonで適用
+- **480pに対応したテレビやモニター**と、480pを伝送できる接続環境が必要です。実機確認にはコンポーネント（D端子）接続を使用しました。
+- **GSMによる映像モードの強制設定はOFF**にしてください。パッチがゲーム側で480p出力を設定します。
+- 色出力はPS2本体の**RGB／コンポーネント設定**に従います。ケーブルの種類を自動検出する機能ではありません。RGB接続での実機動作は未確認です。
 
-Python 3.8以降を使用します。入力ISOは変更されません。デフォルト出力名は元ISO名に `_480p_v1.0.iso` を付加したものです。出力先が既にあれば上書きせず停止します。
+動作確認環境は、PS2実機・OPL・MX4SIO・D端子接続のテレビ（GSM OFF）です。タイトル、HOW TO PLAY、選曲、演奏、打鍵判定、長時間動作を確認しました。ほかの接続機器や起動方法では結果が異なる場合があります。
 
-```powershell
-python patch480p.py "SLPM_650.06.Beatmania IIDX 3rd Style.iso" `
-  --output "SLPM_650.06.Beatmania IIDX 3rd Style_480p_v1.0.iso"
-```
+## 補足
 
-パッチャーは `SYSTEM.CNF` の `BOOT2` を読み、ISO内の実際のELF extentからELFを検証・書き換えます。元ISO全体のSHA-256とサイズは適用条件ではありません。終了時に入力・出力SHA-256、出力サイズ、パッチELFのSHA-256を表示します。
+- **ISOやゲームデータは配布していません。** パッチの利用には、ご自身で用意したゲームのISOが必要です。
+- 映像出力を変更するパッチであり、音声データや譜面、判定処理には手を加えていません。
+- 新しいISOを作成するため、元ISOと同程度の空き容量が必要です。元ISOは保管し、生成されたISOの確認には配布物の `checksums.txt` を利用してください。基準ISO以外から生成した場合、完成ISOのハッシュは掲載値と一致しないことがあります。
 
-## v1.0の変更
+## 謝辞
 
-- 描画: `DISPLAY=0x001DF4FF0882B138`（240行を縦2倍、480出力ライン）。
-- 映像同期設定: `SYNCV=0x00C7900001E00006`（`VDP=484`）。
-- RGB/コンポーネント選択: BIOS/OSD設定を実行時に読み取る既存経路を維持します。未確認のOSD・テレビ設定での動作は保証しません。
-- PMODE: GSから読み戻さず、ゲーム本来の表示環境設定が復旧します。
-- SPU/IOP、音声ピッチ、譜面タイマー、判定処理は変更しません。
+配布方法の構成は、[blurtic2/iidx-ps2-480p](https://github.com/blurtic2/iidx-ps2-480p) を参考にしました。本パッチは3rd style向けの別実装です。
 
-## 実機確認条件
+## ライセンス・免責事項
 
-ユーザーによる動作確認済みの条件:
+パッチプログラムと本プロジェクトのドキュメントは [MIT License](LICENSE) で公開しています。ゲーム本体およびその素材・商標の権利は各権利者に帰属します。
 
-- PS2実機、OPL、MX4SIO、D端子テレビ直結。
-- GSM OFF。
-- タイトル、HOW TO PLAY、選曲、実プレイ、打鍵判定、長時間動作で問題なし。
-
-この確認結果は上記構成に限ります。別のテレビ、OSD出力設定、起動方法で同様に動くことは保証しません。
-
-## 先行実装
-
-[blurtic2/iidx-ps2-480p](https://github.com/blurtic2/iidx-ps2-480p) の配布構成を参考にしています。同リポジトリの主対象は9th〜16thのネイティブ480p描画であり、この3rd Styleパッチとは対象・描画経路が異なります。同リポジトリのパッチコードは本配布物に含めていません。
-
-## ライセンス
-
-このプロジェクトのオリジナルソースコードとドキュメントはMIT Licenseで公開しています。全文は [LICENSE](LICENSE) を参照してください。このライセンスはKonamiのゲーム、ゲーム素材、商標の権利を許諾するものではありません。本リポジトリおよびReleaseにゲームデータは含みません。
-
-## 非公式表記
-
-本パッチはKonamiの公式製品ではなく、Konamiから承認または支援を受けていません。ゲームを所有し、適用が法令と地域の規則に適合することを確認してください。
+本パッチは非公式のもので、KONAMIから承認・支援を受けていません。
