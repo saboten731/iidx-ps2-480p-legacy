@@ -1,37 +1,23 @@
-beatmania IIDX 3rd Style 480p patch v1.0 — verification hashes
+beatmania IIDX 3rd style — 480p Patch v1.0
+SHA-256 verification values
 
-Verified reference ISO (user dump; not claimed Redump-matched)
-  Name:   SLPM_650.06.Beatmania IIDX 3rd Style.iso
-  Size:   3,810,918,400 bytes
-  SHA256: D7E11CD70100675A97DDD9027D1578BDA1397959FA1562151BA9C9E7F94E16D1
+REFERENCE SOURCE ISO (required for xdelta)
+  Size:    3,810,918,400 bytes
+  SHA-256: D7E11CD70100675A97DDD9027D1578BDA1397959FA1562151BA9C9E7F94E16D1
+  Note:    Verified source dump; no claim of matching Redump.
 
-Verified patched ISO (hardware-tested v1.0 target)
-  Name:   SLPM_650.06.Beatmania IIDX 3rd Style_480p_v1.0.iso
-  Size:   3,810,918,400 bytes
-  SHA256: 937A6109F60B4E17A9C88CD5F68B8E0F0886F326948958E35EA20BB7CCB6406B
+PATCHED ISO (from the reference source above)
+  Size:    3,810,918,400 bytes
+  SHA-256: 937A6109F60B4E17A9C88CD5F68B8E0F0886F326948958E35EA20BB7CCB6406B
+  Note:    Same output from xdelta and Python; tested on PS2 hardware.
 
-xdelta patch
-  Name:   IIDX03_SLPM-65006_480p_v1.0.xdelta
-  Size:   13,804 bytes
-  SHA256: 6B8E78EF7DF73D560E75F1AE93A31E3E17ECEE46693B6C4092FCCF4813D98F73
-  Format: VCDIFF, generated and reverse-applied with xdelta3 3.2.2
+XDELTA PATCH
+  File:    IIDX03_480p_v1.0.xdelta
+  Size:    13,804 bytes
+  SHA-256: 6B8E78EF7DF73D560E75F1AE93A31E3E17ECEE46693B6C4092FCCF4813D98F73
 
-Python patcher output from the verified reference ISO
-  Size:   3,810,918,400 bytes
-  SHA256: 937A6109F60B4E17A9C88CD5F68B8E0F0886F326948958E35EA20BB7CCB6406B
-  Check:  matches both xdelta reconstruction and hardware-tested target SHA256
-
-Supported original BOOT2 ELF
-  Size:   9,041,028 bytes
-  SHA256: CD2EE5A1C50C46808927EF32A7FE8F5791AE66399DA029A75D5095CA70499321
-
-Patched BOOT2 ELF
-  SHA256: 12CC9C5F6DA5AB7581BFD5B5C9F185BAB80EC2C649303CE6D4ACDB825DA83292
-
-Python patcher source
-  Name:   patch480p.py
-  SHA256: D69D0DA376BB1100DE5A9990DC5C9788E531139648CE9A308CEC4D0ABB55E3E7
-
-The xdelta3 executable was obtained from the official jmacd/xdelta v3.2.2
-Windows x86-64 release. The archive SHA256 matched the Scoop package manifest:
-D48F7651D86B78FDCA397057B46601F89131F37219675DF736DB70AF44EC3379
+PYTHON PATCHER
+  File:    patch480p.py
+  SHA-256: D69D0DA376BB1100DE5A9990DC5C9788E531139648CE9A308CEC4D0ABB55E3E7
+  Note:    Source ISO contents may differ if its supported game executable is unchanged.
+           In that case the patched ISO SHA-256 will also be different.
