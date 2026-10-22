@@ -1,70 +1,78 @@
-# beatmania IIDX 3rd style — 480p Patch
+# beatmania IIDX (PS2) — 480p Patch
 
 **English** | [日本語](README.ja.md)
 
-An unofficial patch that enables **480p video output** for the PlayStation 2 version of *beatmania IIDX 3rd style* on real PS2 hardware.
+An unofficial patch that enables **480p video output** for the PlayStation 2 versions of *beatmania IIDX 3rd–8th style* on real PS2 hardware.
 
-It doubles the game's existing 240-line image vertically for 480p output, with adjustments to display positioning and video timing. **Song selection and gameplay have been tested on a physical PS2.**
+It adjusts the game's video output and display positioning while retaining the original rendering resolution. **All six supported games have been tested on a physical PS2, including gameplay.**
 
-> **About image quality:** This is 480p output, not a conversion to native 640×480 rendering. It uses a different approach from the native 480p patches for 9th style and later.
+> **About image quality:** This is 480p *output*, not native 640×480 rendering. The game's existing image is vertically scaled for the progressive signal. This implementation differs from the native 480p patches for 9th style and later.
 
 ## Supported games
 
-- **beatmania IIDX 3rd style (PS2)** — Supported and hardware-tested in v1.0.
-- **4th–8th style** — Not supported yet. Additional games are planned as they are completed and verified.
+| Game | Patch | Release |
+|---|---|---|
+| **3rd style** | [`IIDX03_480p_v1.0.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.0/IIDX03_480p_v1.0.xdelta) | [v1.0](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.0) |
+| **4th style** | [`IIDX04_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.1/IIDX04_480p.xdelta) | [v1.1](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.1) |
+| **5th style** | [`IIDX05_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.1/IIDX05_480p.xdelta) | [v1.1](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.1) |
+| **6th style** | [`IIDX06_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.1/IIDX06_480p.xdelta) | [v1.1](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.1) |
+| **7th style** | [`IIDX07_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.1/IIDX07_480p.xdelta) | [v1.1](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.1) |
+| **8th style** | [`IIDX08_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.1/IIDX08_480p.xdelta) | [v1.1](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.1) |
+
+**3rd style** remains available in the original **v1.0** release. **v1.1** adds patches for **4th–8th style**; you do not need to download both releases for a single game.
 
 ## How to apply
 
-Create an ISO from a disc you own. There are two ways to apply the patch: **xdelta** or **Python**. You only need one of them.
+Create an ISO from a game disc you own. Choose **either xdelta or Python**—you do not need both.
 
 ### Option 1: xdelta (recommended)
 
-1. Download [`IIDX03_480p_v1.0.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.0/IIDX03_480p_v1.0.xdelta) from [Releases](https://github.com/saboten731/iidx-ps2-480p-legacy/releases).
-2. Check that your original ISO's SHA-256 matches the **reference ISO** listed in the release's [`checksums.txt`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.0/checksums.txt).
-3. Apply the patch with an xdelta-compatible tool such as Delta Patcher.
+1. Download the `.xdelta` file for your game from the table above.
+2. Check the SHA-256 of your original ISO against the **reference original ISO** for that game: [v1.0 checksums (3rd)](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.0/checksums.txt) or [v1.1 checksums (4th–8th)](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.1/checksums.txt).
+3. Apply the patch with an xdelta-compatible tool (such as Delta Patcher or [xdelta3](https://github.com/jmacd/xdelta/releases)).
+4. If desired, compare the SHA-256 of the resulting ISO with the corresponding **patched ISO** hash in the same checksums file.
 
-The xdelta file works **only with that exact reference ISO**. If your ISO has a different hash, use the Python patcher below instead.
+Each xdelta is built for **one exact reference ISO**. If the original ISO hash differs, do not force the xdelta patch. See the Python option below.
 
-Command-line example (xdelta3):
-
-```sh
-xdelta3 -d -s "beatmania IIDX 3rd style.iso" "IIDX03_480p_v1.0.xdelta" "beatmania IIDX 3rd style_480p.iso"
-```
-
-The ISO filename is just an example; substitute the name of your own file.
-
-### Option 2: Python (for ISOs with different hashes)
-
-Download `patch480p.py` from the [repository](https://github.com/saboten731/iidx-ps2-480p-legacy). Requires Python 3.8 or later; no third-party packages are needed.
+Example with xdelta3 (replace the placeholders with your own paths and choose the patch for your game):
 
 ```sh
-python patch480p.py "beatmania IIDX 3rd style.iso"
+xdelta3 -d -s "<original ISO>" "IIDX04_480p.xdelta" "<output ISO>"
 ```
 
-The script leaves your original ISO untouched and creates a new file with `_480p_v1.0` added to its name. Use `--output` to choose a different output path.
+### Option 2: Python (for a different ISO hash)
 
-The Python patcher can handle an ISO with a different overall hash **if its game executable is an exact match for the supported, unmodified version**. Other revisions and modified executables are rejected. This does not guarantee compatibility with every rebuilt ISO.
+Download [`patch480p.py`](https://github.com/saboten731/iidx-ps2-480p-legacy/blob/main/patch480p.py) from this repository. Use **Python 3.10 or later**; no third-party Python packages are required.
+
+```sh
+python patch480p.py "<original ISO>"
+```
+
+The script creates a separate patched ISO without modifying the original. Use `--output` to specify an output path.
+
+The Python patcher can also work with an ISO whose overall hash differs from the reference **if its game executable is the exact supported, unmodified version**. Different executables and previously patched images are rejected. Compatibility with every rebuilt ISO is not guaranteed.
 
 ## Using it on a PS2
 
-- You need a **480p-capable display** and a connection that supports 480p. Hardware testing used a component (D-terminal) connection.
-- **Disable GSM video-mode forcing.** The patch configures 480p output from within the game.
-- Video color output follows the PS2 system's **RGB/component setting**; the patch does not detect the connected cable. RGB output has not been tested on real hardware.
+- A **480p-capable display** and a video connection that supports 480p are required.
+- **Disable GSM video-mode forcing.** The patch sets the video mode within the game.
+- Video color output follows the PS2 system's **RGB/component setting**; the connected cable is not auto-detected. **RGB output has not been tested on real hardware.**
 
-Testing was performed on a physical PS2 using OPL and MX4SIO, connected directly to a component-input TV with GSM disabled. The title screen, HOW TO PLAY, song selection, gameplay, key judgments, and extended operation were checked. Other displays and boot methods may behave differently.
+Hardware testing used a physical PS2 with OPL/MX4SIO, a direct component (D-terminal) connection, and GSM disabled. Across the six games, display and gameplay were confirmed. Testing was not exhaustive across every song, display, or boot method.
 
 ## Notes
 
-- **No ISO or game data are distributed.** You must supply an ISO made from your own game disc.
-- The patch changes video output; it does not modify music data, charts, or judgment logic.
-- Allow enough free disk space for another full-size ISO. Keep your original ISO and refer to `checksums.txt` to verify the reference ISO and patched output. The output hash may differ when patching a supported ISO with different contents outside the game executable.
+- **No ISOs, game files, or copyrighted game assets are distributed.** Provide an ISO made from your own game disc.
+- This patch changes video output, not music data, charts, or judgment logic.
+- Keep your original ISO and allow enough disk space for a second full-size ISO.
+- The published patched-ISO SHA-256 values apply to the **reference original ISOs**. An ISO accepted by the Python patcher with different non-executable contents may produce a different output hash.
 
 ## Acknowledgments
 
-The distribution format was inspired by [blurtic2/iidx-ps2-480p](https://github.com/blurtic2/iidx-ps2-480p). This patch is a separate implementation for 3rd style.
+The distribution format was inspired by [blurtic2/iidx-ps2-480p](https://github.com/blurtic2/iidx-ps2-480p). This project is a separate implementation for 3rd–8th style.
 
 ## License and disclaimer
 
-The patch software and project documentation are released under the [MIT License](LICENSE). All rights to the original game, its assets, and its trademarks remain with their respective owners.
+The patch software and project documentation are released under the [MIT License](LICENSE). All rights to the original games, their assets, and their trademarks remain with their respective owners.
 
 This is an unofficial patch and is neither endorsed nor supported by KONAMI.

@@ -1,23 +1,50 @@
-beatmania IIDX 3rd style — 480p Patch v1.0
-SHA-256 verification values
+beatmania IIDX (PS2) — 480p Patch v1.1
+SHA-256 verification: 4th–8th style
 
-REFERENCE SOURCE ISO (required for xdelta)
-  Size:    3,810,918,400 bytes
-  SHA-256: D7E11CD70100675A97DDD9027D1578BDA1397959FA1562151BA9C9E7F94E16D1
-  Note:    Verified source dump; no claim of matching Redump.
+No ISO, executable, or game data is included in this release.
+The original-ISO SHA-256 identifies the exact reference input for each xdelta.
+The patched-ISO SHA-256 is the expected output from that reference input.
+These are hashes of the verified reference images; no Redump match is claimed.
 
-PATCHED ISO (from the reference source above)
-  Size:    3,810,918,400 bytes
-  SHA-256: 937A6109F60B4E17A9C88CD5F68B8E0F0886F326948958E35EA20BB7CCB6406B
-  Note:    Same output from xdelta and Python; tested on PS2 hardware.
+[4th style]
+  Original ISO SHA-256:  B1E5C78E750261761BB70AB3E69C8CEB0C8A3D819A248E7145C6A9714DB1BBFD
+  Patched ISO SHA-256:   652E2DF35A7C27F36C1FCD3F97297F559429FE38103CFB26EC482A3D5897CFAF
+  xdelta filename:       IIDX04_480p.xdelta
+  xdelta size:           9603 bytes
+  xdelta SHA-256:        C6B565033DF58F300DB828F7AD473EE2B3CC10D150A7871A7153CD991A8A4945
 
-XDELTA PATCH
-  File:    IIDX03_480p_v1.0.xdelta
-  Size:    13,804 bytes
-  SHA-256: 6B8E78EF7DF73D560E75F1AE93A31E3E17ECEE46693B6C4092FCCF4813D98F73
+[5th style]
+  Original ISO SHA-256:  E316D8F6A160327220CFB4E34F197CA8142459D6FF46CF87BDF0F10BDF6C2DF6
+  Patched ISO SHA-256:   6802393A94686BCD8F056B6CF981D19EAE31B8016AC29F8362DAD4D904D12C6D
+  xdelta filename:       IIDX05_480p.xdelta
+  xdelta size:           13404 bytes
+  xdelta SHA-256:        17F2AF8BF95B0827F0DC8EFC0AF36557443A29EEA44BDB8962CB848887D4E87A
 
-PYTHON PATCHER
-  File:    patch480p.py
-  SHA-256: D69D0DA376BB1100DE5A9990DC5C9788E531139648CE9A308CEC4D0ABB55E3E7
-  Note:    Source ISO contents may differ if its supported game executable is unchanged.
-           In that case the patched ISO SHA-256 will also be different.
+[6th style]
+  Original ISO SHA-256:  9DE280C7CAD7A3A40687D3B3FB968823073830230EF07EC3157AC8CAF0E4CFCC
+  Patched ISO SHA-256:   DBB887B00BF78CAB8AA9EA7332B1C4ABE5B36DFF344732E40E93C77FA6B957FA
+  xdelta filename:       IIDX06_480p.xdelta
+  xdelta size:           16388 bytes
+  xdelta SHA-256:        8B56C5C6B79E30479A79CC8BBFEA5E6D01124F927BC5B7AF81ADC59E3653E3AD
+
+[7th style]
+  Original ISO SHA-256:  60A8BFA00EBC393CDEC24D5FFF1B0B8AE902AC2BA0277EAF7D497ECA67A029C0
+  Patched ISO SHA-256:   6B45A62D6797DC5E67D7216F67870CB40112F26FFA73802F886FA5D8D29EE3B0
+  xdelta filename:       IIDX07_480p.xdelta
+  xdelta size:           9875 bytes
+  xdelta SHA-256:        97F4A65FF143142CFC1089C4AA42FD9C08DB22794C9D0942C45020967DEA1BFE
+
+[8th style]
+  Original ISO SHA-256:  DD51774A2FBFE7692FD25CD0FC828CF217A65BDA6B5619F1E8DE1FF7E79CE2CF
+  Patched ISO SHA-256:   458E6A806BBB7921802E133DD47B9A573311BC805F75C2D43F4B59FE5301F1F8
+  xdelta filename:       IIDX08_480p.xdelta
+  xdelta size:           14236 bytes
+  xdelta SHA-256:        7FCD3A581A0632DBBE57772E98A182ACEDA35333C9B9921861E2670EEF68A57D
+
+Python patcher (repository file; not a Release asset):
+  patch480p.py SHA-256: CAC84F23E5B5B5402DC4F75F63F9134D9380CE48E6D5ECA43C6C8ED3882D6171
+  The Python patcher requires the exact supported, unmodified game executable.
+  A different overall source-ISO hash can result in a different output-ISO hash.
+
+For 3rd style (unchanged v1.0) and its reference hashes, see:
+  https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.0/checksums.txt
