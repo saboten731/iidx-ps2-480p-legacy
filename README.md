@@ -58,7 +58,23 @@ The Python patcher can also work with an ISO whose overall hash differs from the
 - **Disable GSM video-mode forcing.** The patch sets the video mode within the game.
 - Video color output follows the PS2 system's **RGB/component setting**; the connected cable is not auto-detected. **RGB output has not been tested on real hardware.**
 
-Hardware testing used a physical PS2 with OPL/MX4SIO, a direct component (D-terminal) connection, and GSM disabled. Across the six games, display and gameplay were confirmed. Testing was not exhaustive across every song, display, or boot method.
+## Hardware compatibility
+
+### Tested setups
+
+| ID | PS2 Model | Loader / Storage | Video Connection | Display | GSM |
+|---|---|---|---|---|---|
+| A | SCPH-77000 (JP) | OPL / MX4SIO | Component (D-terminal) | 480p TV (direct, no scaler) | Off |
+
+### Compatibility matrix
+
+| Setup | 3rd | 4th | 5th | 6th | 7th | 8th |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| A | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+
+**Legend:** ✓ = Tested OK / ✗ = Confirmed issue / — = Not tested
+
+A passing result means that video output and gameplay were confirmed on the listed hardware setup. Compatibility with other PS2 models, video connections, displays, or boot methods has not been verified. Testing does not cover every song or extended operation.
 
 ## Notes
 
