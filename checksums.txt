@@ -42,7 +42,7 @@ These are hashes of the verified reference images; no Redump match is claimed.
   xdelta SHA-256:        7FCD3A581A0632DBBE57772E98A182ACEDA35333C9B9921861E2670EEF68A57D
 
 Python patcher (repository file; not a Release asset):
-  patch480p.py SHA-256: CAC84F23E5B5B5402DC4F75F63F9134D9380CE48E6D5ECA43C6C8ED3882D6171
+  patch480p.py SHA-256: 4F211081CD55E0C03AD9D7573A81E907EBB30E3C3ABFE7F8BB1D972A00FF3899
   The Python patcher requires the exact supported, unmodified game executable.
   A different overall source-ISO hash can result in a different output-ISO hash.
 
