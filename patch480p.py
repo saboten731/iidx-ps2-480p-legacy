@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Patch a supported IIDX PS2 ISO to its title-specific 480p profile.
+"""Patch a supported IIDX PS2 ISO to BIOS-native 480p with 526-line SYNCV.
 
 Only the exact allowlisted BOOT2 ELF is accepted. The ISO and boot ELF extents
 are read from ISO9660/SYSTEM.CNF; the input image itself is never modified.
@@ -34,50 +34,26 @@ ALREADY_PATCHED_ELF_SHA256S = {
     "6AFA8792C1FD1A177D807D73324AAFA23B506FEC635C50A834D2703761A896BD",
     "106F4482FA6DECA1D8A0412F85AFC2E8CE265EBE0FFACD79BF5CEB649F4855E2",
     "833129A3A1EC9EE3F45816377336681D565706F4559A65902FD071B34CCEFC56",
+    # Published 3rd-8th outputs remain recognizable after the new hashes replace them.
+    "12CC9C5F6DA5AB7581BFD5B5C9F185BAB80EC2C649303CE6D4ACDB825DA83292",
+    "9E4DBDBBC577991F5D115B679DCDB138F282E8AB69A99969C0774C0FB6F78484",
+    "68054D4B48C863F5316785BC038D0E9515EEDDA1AA55BAA3FFFC421C055CB481",
+    "94F0B6B2B6167D842ED34C3A202DF2839E2B50E922121A8A2F209905ECC3C240",
+    "F1EF5509C9706A763DE54F72B8B3DEBB1F5E68A6B735EBFCAE6787251D0D3120",
+    "C7E562C6CBEB471EAC8B575596354FCD19574662F15E08F2CBA88EE61510630E",
+    # An earlier 5th cave overlapped sound data; its causal role is unproven.
+    "27DC19D75D9D63AB116429B8AE021344C583158F6C77A551250A611B49CB309B",
 }
 MAX_BOOT_ELF_SIZE = 128 * 1024 * 1024  # Defensive parser limit, not a revision check.
 MIN_OUTPUT_SPACE_MARGIN = 64 * 1024 * 1024
 
 GS_BASE = 0x12000000
 GS_PMODE_OFFSET = 0x00
-GS_SMODE1_OFFSET = 0x10
-GS_SMODE2_OFFSET = 0x20
-GS_SRFSH_OFFSET = 0x30
-GS_SYNCH1_OFFSET = 0x40
-GS_SYNCH2_OFFSET = 0x50
 GS_SYNCV_OFFSET = 0x60
-
-# Preserve the previously observed 480p SMODE1 profile's non-control fields.
-# PRST (bit 16) and SINT (bit 17) are clear in the final profile. GCONT (bit
-# 25) is ORed from ConfigParam.videoOutput at runtime, never fixed in the ISO.
-SMODE1_PROFILE_FINAL = 0x0000001740400504
-SMODE1_GCONT = 1 << 25
-SMODE1_PRST = 1 << 16
-SMODE1_SINT = 1 << 17
 CONFIG_VIDEO_OUTPUT_SHIFT = 3
-
-CRTC_REGISTER_OFFSETS = (
-    GS_SMODE2_OFFSET,
-    GS_SRFSH_OFFSET,
-    GS_SYNCH1_OFFSET,
-    GS_SYNCH2_OFFSET,
-    GS_SYNCV_OFFSET,
-)
-
-PATCH_PROFILES = {
-    "v1.0": {
-        "display_value": 0x001DF4FF0882B138,
-        # BIOS-native VDP+1 needs per-BIOS values: inspected SYNCV defaults
-        # differ (10000 VDP=483/VFP=6; 39001/77000 VDP=480/VFP=9).
-        "timing_values": (
-            0x0000000000000002,  # SMODE2
-            0x0000000000000004,  # SRFSH
-            0x000402DA20034020,  # SYNCH1
-            0x000000000019D272,  # SYNCH2
-            0x00C7900001E00006,  # SYNCV: published VDP=484 profile
-        ),
-    },
-}
+DEFAULT_DISPLAY_VALUE = 0x001DF4FF0882B138
+BIOS_NATIVE_SYNCV_526 = 0x00C7900001E00006
+PATCH_STATE = "BIOS_NATIVE_526_HARDWARE_VALIDATION_CONFIRMED"
 
 # Per-title identities and patch locations are kept separate. Every executable
 # is independently allowlisted by its unmodified BOOT2 ELF SHA-256; addresses
@@ -85,9 +61,8 @@ PATCH_PROFILES = {
 TITLE_CONFIGS = {
     "SLPM_650.06": {
         "title": "IIDX 3rd Style",
-        "state": "PATCHED_IIDX03_480P_V1_0",
         "elf_sha256": "CD2EE5A1C50C46808927EF32A7FE8F5791AE66399DA029A75D5095CA70499321",
-        "patched_elf_sha256": "12CC9C5F6DA5AB7581BFD5B5C9F185BAB80EC2C649303CE6D4ACDB825DA83292",
+        "patched_elf_sha256": "2514ACF29600724DF842325D9D14C29983BBBC2843AB3C8315DF4245EAB4F9CA",
         "load_segment": (0x1000, 0x00100000, 0x0089E249, 0x00CC518C, 0x7),
         "text": (0x00100000, 0x1000, 0x000765EC),
         "display_cave_va": 0x00171808,
@@ -123,9 +98,8 @@ TITLE_CONFIGS = {
     },
     "SLPM_650.26": {
         "title": "IIDX 4th Style",
-        "state": "PATCHED_IIDX04_480P_HARDWARE_PASS",
         "elf_sha256": "DC507D7D35A7AF5ADB1607B856FCC23AAF8CB6841B32EC53266C3741F6A35429",
-        "patched_elf_sha256": "9E4DBDBBC577991F5D115B679DCDB138F282E8AB69A99969C0774C0FB6F78484",
+        "patched_elf_sha256": "BF026F7F79B6C3F793BEDE0FC84771EC4CFF9FEF3CFA98D977230344F4D7BC82",
         "load_segment": (0x1000, 0x00100000, 9_251_545, 13_623_500, 0x7),
         "text": (0x00100000, 0x1000, 0x000893E0),
         "display_cave_va": 0x00278520,
@@ -152,15 +126,35 @@ TITLE_CONFIGS = {
     },
     "SLPM_650.49": {
         "title": "IIDX 5th Style",
-        "state": "PATCHED_IIDX05_480P_HARDWARE_PASS",
+        "hardware_status": "IIDX05_480P_AUDIO_HARDWARE_PASS",
         "elf_sha256": "6667292D88836087A90BEDD8E9856AE08132FDC4291D4958DDBE11E37F547B9C",
-        "patched_elf_sha256": "68054D4B48C863F5316785BC038D0E9515EEDDA1AA55BAA3FFFC421C055CB481",
+        "patched_elf_sha256": "ECF29FB2DE72EE70082B6EC663DD9976CDD766CD74275B47CC1FA098024BA5A5",
         "load_segment": (0x1000, 0x00100000, 13_639_337, 18_059_020, 0x7),
         "text": (0x00100000, 0x1000, 0x000ABE88),
-        "display_cave_va": 0x00464D40,
+        # Both helpers stay outside the 0x4000-byte EE sound headers.
+        # The entry and DISPLAY code fill the loaded .data/.rodata gap;
+        # the CRTC continuation fills alignment padding before the other header.
+        "display_cave_va": 0x00288DD8,
         "display_cave_size": 0x28,
-        "crtc_cave_va": 0x00464C20,
-        "crtc_cave_size": 0x118,
+        "crtc_cave_va": 0x00288D90,
+        "crtc_cave_size": 0x48,
+        "crtc_continuation_va": 0x002E2714,
+        "crtc_continuation_size": 0x6C,
+        "crtc_continuation_end_va": 0x002E2780,
+        "protected_ranges": ((0x002E2780, 0x4000), (0x00464980, 0x4000)),
+        # 5th audio passed on real PS2 after doubling both HLINE timer
+        # intervals; the exact hardware clock was not directly measured.
+        "audio_timer_irx": {
+            "path": ("DX2_5", "IRX", "IOP_MAIN.IRX"),
+            "size": 73348,
+            "original_sha256": "1AAB9996F5C8E67E0438B5C1BC9E95560149CFC893BCD1E26303BDA8CCB72920",
+            "patched_sha256": "ED90C76F0D57015475C1A5D436C633BE6D7A1E585C8FB988240F3ADFD9471AA9",
+            "load_offset": 0x90,
+            "changes": (
+                (0x000003D4, 0x24020050, 0x240200A0),  # HIntHandler next interval
+                (0x00000420, 0x24050050, 0x240500A0),  # SetTimerHandler first interval
+            ),
+        },
         "display_hook_va": 0x0018A100,
         "display_hook_delay_va": 0x0018A104,
         "display_hook_return_va": 0x0018A108,
@@ -181,9 +175,8 @@ TITLE_CONFIGS = {
     },
     "SLPM_651.56": {
         "title": "IIDX 6th Style",
-        "state": "PATCHED_IIDX06_480P_HARDWARE_DISPLAY_AND_PLAY_PASS",
         "elf_sha256": "4C58566CD7D5E5F0EBA377615EB27FA87E8E2EA99C10673D619DCF4693EA751B",
-        "patched_elf_sha256": "94F0B6B2B6167D842ED34C3A202DF2839E2B50E922121A8A2F209905ECC3C240",
+        "patched_elf_sha256": "2A836F77EEE906526834BC1F2C24DB47CEC881FC6948A659DA794D5AC0ACC3B3",
         "load_segments": (
             (0x1000, 0x00100000, 847_440, 847_440, 0x5),
             (851_584, 1_896_064, 8_884_236, 14_588_912, 0x6),
@@ -227,9 +220,8 @@ TITLE_CONFIGS = {
     },
     "SLPM_655.93": {
         "title": "IIDX 7th Style",
-        "state": "PATCHED_IIDX07_480P_HARDWARE_DISPLAY_AND_PLAY_PASS",
         "elf_sha256": "A0D1D4C1C47F0A251F7708DC003EE4A86A3D4FDC194BF9A6EEDA4B96063CCCEC",
-        "patched_elf_sha256": "F1EF5509C9706A763DE54F72B8B3DEBB1F5E68A6B735EBFCAE6787251D0D3120",
+        "patched_elf_sha256": "EEDA9B0744C113E445F7E39D12BC413E0200AD144E519576835FFA3AE22EFED3",
         "load_segments": (
             (128, 0x00100000, 11_714_944, 17_513_600, 0x7),
             (11_715_072, 18_562_176, 0, 0, 0x6),
@@ -270,9 +262,8 @@ TITLE_CONFIGS = {
     },
     "SLPM_657.68": {
         "title": "IIDX 8th Style",
-        "state": "PATCHED_IIDX08_480P_HARDWARE_PASS",
         "elf_sha256": "F4EFE03117DF8F31B0B23AE8D9A963F9D60FFE6D9CD7EFE4A7B0A5CAD925B220",
-        "patched_elf_sha256": "C7E562C6CBEB471EAC8B575596354FCD19574662F15E08F2CBA88EE61510630E",
+        "patched_elf_sha256": "68205F05B1543DC74682D990A21F2205AAFF4537AFB56DC98A0E517BD12310CA",
         "load_segments": (
             (128, 0x00100000, 9_893_504, 15_628_928, 0x7),
             (9_893_632, 16_677_504, 0, 0, 0x6),
@@ -308,8 +299,6 @@ TITLE_CONFIGS = {
         "display_256_to_480": True,
         "display_only_256_rows": True,
         "display_256_dy_plus8": True,
-        # Existing diagnostics inspect this key directly; share the one profile tuple.
-        "timing_values": PATCH_PROFILES["v1.0"]["timing_values"],
     },
 }
 
@@ -317,16 +306,8 @@ ALREADY_PATCHED_ELF_SHA256S.update(
     config["patched_elf_sha256"] for config in TITLE_CONFIGS.values()
 )
 
-# Compatibility fallbacks used by existing tests' dict.get defaults. Patch
-# generation reads the selected title's cave addresses from TITLE_CONFIGS.
-CRTC_CAVE_VA = TITLE_CONFIGS["SLPM_650.06"]["crtc_cave_va"]
-CRTC_CAVE_SIZE = TITLE_CONFIGS["SLPM_650.06"]["crtc_cave_size"]
-
-SYSCALL_SETGSCRT = 0x02
 SYSCALL_GETOSDCONFIGPARAM = 0x4B
 SYSCALL_SETGSVPARAM = 0x4F
-SYNC_L_WORD = 0x0000000F  # SPECIAL, stype=0, funct=SYNC
-SYNC_P_WORD = 0x0000040F  # SPECIAL, stype=16, funct=SYNC
 
 REG = {
     "zero": 0, "v0": 2, "v1": 3,
@@ -489,6 +470,71 @@ def locate_boot_elf(
     return elf_offset, elf_size, elf, product_code
 
 
+def locate_iso_member(
+    iso_path: Path, components: tuple[str, ...], max_size: int
+) -> tuple[int, bytes]:
+    """Locate an allowlisted data file without changing the ISO directory."""
+    iso_size = iso_path.stat().st_size
+    with iso_path.open("rb") as stream:
+        pvd = read_at(stream, 16 * SECTOR_SIZE, SECTOR_SIZE)
+        if pvd[:7] != b"\x01CD001\x01":
+            raise PatchError("ISO9660 primary volume descriptor not found")
+        root = pvd[156 : 156 + pvd[156]]
+        if len(root) < 34:
+            raise PatchError("invalid ISO9660 root directory record")
+        root_lba = struct.unpack_from("<I", root, 2)[0]
+        root_size = struct.unpack_from("<I", root, 10)[0]
+        if root_size > 64 * 1024 * 1024:
+            raise PatchError("ISO9660 root directory exceeds the safety limit")
+        entries = list(parse_directory(_read_iso_extent(stream, iso_size, root_lba, root_size, "root")))
+        for index, component in enumerate(components):
+            entry = _lookup_iso_entry(entries, component, "embedded file")
+            is_last = index == len(components) - 1
+            if is_last:
+                if entry[3] or entry[2] > max_size:
+                    raise PatchError(f"invalid embedded file extent: {component}")
+                return entry[1] * SECTOR_SIZE, _read_iso_extent(
+                    stream, iso_size, entry[1], entry[2], component
+                )
+            if not entry[3] or entry[2] > 64 * 1024 * 1024:
+                raise PatchError(f"invalid embedded directory: {component}")
+            entries = list(parse_directory(_read_iso_extent(
+                stream, iso_size, entry[1], entry[2], component
+            )))
+    raise PatchError("empty embedded ISO path")
+
+
+def make_patched_iop_irx(irx: bytes, config: dict) -> tuple[bytes, list[tuple[int, bytes]]]:
+    """Apply the 5th-only HLINE audio fix confirmed on real PS2."""
+    if len(irx) != config["size"] or sha256_bytes(irx) != config["original_sha256"]:
+        raise PatchError("unsupported or modified 5th IOP_MAIN.IRX")
+    if irx[:6] != b"\x7fELF\x01\x01" or struct.unpack_from("<H", irx, 18)[0] != 8:
+        raise PatchError("5th IOP_MAIN.IRX is not a little-endian MIPS ELF")
+    phoff = struct.unpack_from("<I", irx, 28)[0]
+    phentsize, phnum = struct.unpack_from("<HH", irx, 42)
+    if phentsize != 32 or phnum > 16 or phoff + phentsize * phnum > len(irx):
+        raise PatchError("invalid 5th IOP_MAIN.IRX program headers")
+    loads = [struct.unpack_from("<8I", irx, phoff + i * phentsize)
+             for i in range(phnum)]
+    loads = [header for header in loads if header[0] == 1]
+    if len(loads) != 1 or loads[0][1:3] != (config["load_offset"], 0):
+        raise PatchError("5th IOP_MAIN.IRX load segment changed")
+    patched = bytearray(irx)
+    rows = []
+    for va, expected, replacement in config["changes"]:
+        if va + 4 > loads[0][4]:
+            raise PatchError("5th audio timer instruction is outside the load segment")
+        offset = config["load_offset"] + va
+        if struct.unpack_from("<I", irx, offset)[0] != expected:
+            raise PatchError(f"5th audio timer preimage changed at {va:#x}")
+        after = struct.pack("<I", replacement)
+        patched[offset : offset + 4] = after
+        rows.append((offset, after))
+    if sha256_bytes(patched) != config["patched_sha256"]:
+        raise PatchError("5th audio timer patched IRX hash is unexpected")
+    return bytes(patched), rows
+
+
 def parse_title_load_segment(elf: bytes, product_code: str):
     """Parse and exactly verify every PT_LOAD for one title."""
     if product_code not in TITLE_CONFIGS:
@@ -601,138 +647,99 @@ def encode_r(rs: int, rt: int, rd: int, sa: int, fn: int) -> int:
 
 
 def build_crtc_helper(
-    timing_values: tuple[int, ...],
-    cave_va: int,
-) -> tuple[bytes, list[tuple[str, int]], int]:
-    """Assemble a straight-line R5900 helper and append its aligned data table."""
-    if SMODE1_PROFILE_FINAL & (SMODE1_PRST | SMODE1_SINT):
-        raise PatchError("final SMODE1 must have PRST and SINT cleared")
+    cave_va: int, wrapper_va: int, *,
+    compact_first_guard: bool = False,
+    wrapper_call_va: int | None = None,
+) -> tuple[bytes, list[tuple[str, int]]]:
+    """Build the shared BIOS-native ResetGraph tail."""
     code: list[int] = []
     listing: list[tuple[str, int]] = []
-    events: dict[str, int] = {}
 
-    def emit(text: str, word: int, event: str | None = None) -> None:
-        if event:
-            events[event] = len(code)
+    def emit(text: str, word: int) -> int:
         code.append(word & 0xFFFFFFFF)
         listing.append((text, word & 0xFFFFFFFF))
+        return len(code) - 1
 
-    def ri(op: int, rt: str, rs: str, imm: int, text: str) -> None:
-        emit(text, encode_i(op, REG[rs], REG[rt], imm))
+    def ri(op: int, rt: str, rs: str, imm: int, text: str) -> int:
+        return emit(text, encode_i(op, REG[rs], REG[rt], imm))
 
-    def rr(rs: str, rt: str, rd: str, sa: int, fn: int, text: str) -> None:
-        emit(text, encode_r(REG[rs], REG[rt], REG[rd], sa, fn))
+    def rr(rs: str, rt: str, rd: str, sa: int, fn: int, text: str) -> int:
+        return emit(text, encode_r(REG[rs], REG[rt], REG[rd], sa, fn))
 
-    # ResetGraph's delay slot has already restored its incoming stack. Save the
-    # two SetGsCrt arguments needed after the OSD/SetGsVParam syscalls.
-    ri(0x19, "sp", "sp", -32, "daddiu sp,sp,-32")
-    ri(0x2B, "a0", "sp", 0x18, "sw a0,24(sp)")
-    ri(0x2B, "a2", "sp", 0x1C, "sw a2,28(sp)")
-
-    # GetOsdConfigParam(ConfigParam*) uses syscall 0x4B. videoOutput is bit 3
-    # of the first ConfigParam word (0=RGB, 1=COMPONENT).
-    ri(0x09, "a0", "sp", 0, "addiu a0,sp,0")
+    # ResetGraph's tail delay slot has already restored its own stack.
+    ri(0x19, "sp", "sp", -64, "daddiu sp,sp,-64")
+    ri(0x3F, "a0", "sp", 32, "sd a0,32(sp)")
+    ri(0x3F, "a1", "sp", 40, "sd a1,40(sp)")
+    ri(0x3F, "a2", "sp", 48, "sd a2,48(sp)")
+    ri(0x3F, "ra", "sp", 56, "sd ra,56(sp)")
+    ri(0x19, "a0", "sp", 0, "daddiu a0,sp,0 ; ConfigParam*")
     ri(0x09, "v1", "zero", SYSCALL_GETOSDCONFIGPARAM, "addiu v1,zero,0x4b")
     emit("syscall", 0x0000000C)
-    ri(0x23, "t0", "sp", 0, "lw t0,0(sp)")
-    ri(0x0C, "a0", "t0", 1 << CONFIG_VIDEO_OUTPUT_SHIFT, "andi a0,t0,0x0008")
+    ri(0x23, "a0", "sp", 0, "lw a0,0(sp) ; ConfigParam")
+    ri(0x0C, "a0", "a0", 1 << CONFIG_VIDEO_OUTPUT_SHIFT, "andi a0,a0,8")
     rr("zero", "a0", "a0", CONFIG_VIDEO_OUTPUT_SHIFT, 0x02, "srl a0,a0,3")
     ri(0x09, "v1", "zero", SYSCALL_SETGSVPARAM, "addiu v1,zero,0x4f")
     emit("syscall", 0x0000000C)
+    ri(0x37, "a0", "sp", 32, "ld a0,32(sp)")
+    ri(0x37, "a1", "sp", 40, "ld a1,40(sp) ; normalized ResetGraph mode")
+    ri(0x37, "a2", "sp", 48, "ld a2,48(sp)")
+    ri(0x37, "ra", "sp", 56, "ld ra,56(sp)")
 
-    # Match PS2SDK graph_set_mode(): order prior stores before SetGsCrt.
-    emit("sync.p", SYNC_P_WORD, "sync_before_setgscrt")
-    emit("nop", 0)
-    ri(0x23, "a0", "sp", 0x18, "lw a0,24(sp)")
-    ri(0x09, "a1", "zero", 2, "addiu a1,zero,2")  # Preserve NTSC VBlank mode.
-    ri(0x23, "a2", "sp", 0x1C, "lw a2,28(sp)")
-    ri(0x09, "v1", "zero", SYSCALL_SETGSCRT, "addiu v1,zero,2")
-    emit("syscall", 0x0000000C)
+    call_va = wrapper_call_va if wrapper_call_va is not None else cave_va + len(code) * 4
+    emit("jal original SetGsCrt wrapper", encode_j(call_va, wrapper_va) | 0x04000000)
+    emit("nop ; jal delay slot", 0)
+    ri(0x3F, "t0", "sp", 16, "sd t0,16(sp) ; preserve BIOS-return t0")
+    ri(0x3F, "t1", "sp", 24, "sd t1,24(sp) ; preserve BIOS-return t1")
 
-    # GS privileged PMODE reads are not a valid software shadow (PCSX2 mirrors
-    # CSR there). Disable both read circuits, then let IIDX's normal display-
-    # environment writer restore the PMODE value it already owns. This avoids
-    # both PMODE readback and a fixed 0x66 restoration value.
+    # Only the normalized (0, DTV480P, 1) path needs the 526-line SYNCV.
+    ri(0x37, "t0", "sp", 32, "ld t0,32(sp) ; saved a0")
+    skip_a0 = emit("bne t0,zero,done", 0)
+    if compact_first_guard:
+        # The branch compares saved a0 before its delay slot. On either path,
+        # this load is safe: the taken path restores t0 at done.
+        ri(0x37, "t0", "sp", 40, "ld t0,40(sp) ; first guard delay slot")
+    else:
+        emit("nop ; branch delay slot", 0)
+        ri(0x37, "t0", "sp", 40, "ld t0,40(sp) ; saved a1")
+    ri(0x09, "t1", "zero", 0x50, "addiu t1,zero,0x50")
+    skip_a1 = emit("bne t0,t1,done", 0)
+    emit("nop ; branch delay slot", 0)
+    ri(0x37, "t0", "sp", 48, "ld t0,48(sp) ; saved a2")
+    ri(0x09, "t1", "zero", 1, "addiu t1,zero,1")
+    skip_a2 = emit("bne t0,t1,done", 0)
+    emit("nop ; branch delay slot", 0)
+
+    chunks = [(BIOS_NATIVE_SYNCV_526 >> shift) & 0xFFFF for shift in (48, 32, 16, 0)]
+    ri(0x0F, "t1", "zero", chunks[0], "lui t1,SYNCV[63:48]")
+    ri(0x0D, "t1", "t1", chunks[1], "ori t1,t1,SYNCV[47:32]")
+    rr("zero", "t1", "t1", 16, 0x38, "dsll t1,t1,16")
+    ri(0x0D, "t1", "t1", chunks[2], "ori t1,t1,SYNCV[31:16]")
+    rr("zero", "t1", "t1", 16, 0x38, "dsll t1,t1,16")
+    ri(0x0D, "t1", "t1", chunks[3], "ori t1,t1,SYNCV[15:0]")
     ri(0x0F, "t0", "zero", GS_BASE >> 16, "lui t0,0x1200")
-    ri(0x3F, "zero", "t0", GS_PMODE_OFFSET, "sd zero,0(t0) ; disable RC1/RC2 until IIDX writes its display env")
-    events["pmode_disabled"] = len(code) - 1
+    ri(0x3F, "t1", "t0", GS_SYNCV_OFFSET, "sd t1,0x60(t0) ; SYNCV once")
 
-    # Build the runtime SMODE1: preserve the observed profile, clear PRST and
-    # SINT in the final form, then OR the live OSD GCONT bit. Keep the final
-    # value in t4 while t1 is reused for timing-table loads.
-    table_address_load_index = len(code)
-    emit("lui t9,<timing_table_hi>", 0)
-    emit("ori t9,t9,<timing_table_lo>", 0)
-    ri(0x37, "t1", "t9", 0, "ld t1,0(t9) ; final SMODE1 profile")
-    ri(0x23, "t2", "sp", 0, "lw t2,0(sp) ; ConfigParam")
-    ri(0x0C, "t2", "t2", 1 << CONFIG_VIDEO_OUTPUT_SHIFT, "andi t2,t2,0x0008")
-    rr(
-        "zero", "t2", "t2",
-        SMODE1_GCONT.bit_length() - 1 - CONFIG_VIDEO_OUTPUT_SHIFT,
-        0x00, "sll t2,t2,22 ; videoOutput bit 3 -> GCONT bit 25",
-    )
-    rr("t1", "t2", "t1", 0, 0x25, "or t1,t1,t2 ; runtime GCONT")
-    rr("t1", "zero", "t4", 0, 0x2D, "daddu t4,t1,zero ; retain final SMODE1")
-    ri(0x0F, "t3", "zero", SMODE1_PRST >> 16, "lui t3,0x0001")
-    rr("t1", "t3", "t3", 0, 0x25, "or t3,t1,t3 ; prepare PRST=1")
-    ri(0x3F, "t3", "t0", GS_SMODE1_OFFSET, "sd t3,16(t0) ; SMODE1 prepare")
-    events["smode1_prepare"] = len(code) - 1
-    emit("sync.l", SYNC_L_WORD, "sync_after_prepare_l")
-    emit("sync.p", SYNC_P_WORD, "sync_after_prepare_p")
-
-    timing_events = []
-    for table_index, register_offset in enumerate(CRTC_REGISTER_OFFSETS, start=1):
-        table_off = table_index * 8
-        register_name = {
-            GS_SMODE2_OFFSET: "SMODE2",
-            GS_SRFSH_OFFSET: "SRFSH",
-            GS_SYNCH1_OFFSET: "SYNCH1",
-            GS_SYNCH2_OFFSET: "SYNCH2",
-            GS_SYNCV_OFFSET: "SYNCV",
-        }[register_offset]
-        ri(0x37, "t1", "t9", table_off, f"ld t1,{table_off}(t9) ; {register_name} value")
-        ri(0x3F, "t1", "t0", register_offset, f"sd t1,{register_offset}(t0) ; {register_name}")
-        event = f"write_{register_name.lower()}"
-        events[event] = len(code) - 1
-        timing_events.append(event)
-    emit("sync.l", SYNC_L_WORD, "sync_after_timing_l")
-    emit("sync.p", SYNC_P_WORD, "sync_after_timing_p")
-
-    ri(0x3F, "t4", "t0", GS_SMODE1_OFFSET, "sd t4,16(t0) ; SMODE1 final (PRST=0,SINT=0)")
-    events["smode1_final"] = len(code) - 1
-    ri(0x19, "sp", "sp", 32, "daddiu sp,sp,32")
+    done = len(code)
+    ri(0x37, "t1", "sp", 24, "ld t1,24(sp)")
+    ri(0x37, "t0", "sp", 16, "ld t0,16(sp)")
+    ri(0x37, "ra", "sp", 56, "ld ra,56(sp)")
     rr("ra", "zero", "zero", 0, 0x08, "jr ra")
-    emit("nop", 0)
+    ri(0x19, "sp", "sp", 64, "daddiu sp,sp,64 ; return delay slot")
 
-    code_end = cave_va + len(code) * 4
-    table_va = (code_end + 7) & ~7
-    table_hi = (table_va >> 16) & 0xFFFF
-    table_lo = table_va & 0xFFFF
-    code[table_address_load_index] = encode_i(0x0F, 0, REG["t9"], table_hi)
-    code[table_address_load_index + 1] = encode_i(0x0D, REG["t9"], REG["t9"], table_lo)
-    listing[table_address_load_index] = (f"lui t9,0x{table_hi:04x}", code[table_address_load_index])
-    listing[table_address_load_index + 1] = (f"ori t9,t9,0x{table_lo:04x}", code[table_address_load_index + 1])
-
-    if len(timing_values) != len(CRTC_REGISTER_OFFSETS):
-        raise PatchError("unexpected number of CRTC timing values")
-    table_values = (SMODE1_PROFILE_FINAL, *timing_values)
-    code_bytes = struct.pack("<" + "I" * len(code), *code)
-    pad = bytes(table_va - (cave_va + len(code_bytes)))
-    table_bytes = struct.pack("<" + "Q" * len(table_values), *table_values)
-    helper = code_bytes + pad + table_bytes
-    required_order = (
-        "pmode_disabled",
-        "smode1_prepare",
-        "sync_after_prepare_l",
-        "sync_after_prepare_p",
-        *timing_events,
-        "sync_after_timing_l",
-        "sync_after_timing_p",
-        "smode1_final",
-    )
-    if any(a >= b for a, b in zip((events[k] for k in required_order), (events[k] for k in required_order[1:]))):
-        raise PatchError("generated CRTC state transition is out of order")
-    return helper, listing, table_va
+    for position, compare_reg in ((skip_a0, "zero"), (skip_a1, "t1"), (skip_a2, "t1")):
+        relative = done - (position + 1)
+        expected_delay = (
+            encode_i(0x37, REG["sp"], REG["t0"], 40)
+            if compact_first_guard and position == skip_a0 else 0
+        )
+        if not 0 < relative < 0x8000 or code[position + 1] != expected_delay:
+            raise PatchError("invalid CRTC mode guard")
+        word = encode_i(0x05, REG["t0"], REG[compare_reg], relative)
+        code[position] = word
+        listing[position] = (listing[position][0], word)
+    if len(code) != (44 if compact_first_guard else 45):
+        raise PatchError("unexpected BIOS-native CRTC helper length")
+    return struct.pack("<" + "I" * len(code), *code), listing
 
 
 def assert_cave_static_safety(
@@ -793,8 +800,7 @@ def make_display_helper(
     cave_va: int,
     hook_return_va: int,
 ) -> bytes:
-    # Build the same 40-byte helper for either the preserved trial value or a
-    # phase-specific DISPLAY value. The value is assembled as four halfwords.
+    # Assemble the configured DISPLAY value as four halfwords in 40 bytes.
     halves = (
         (display_value >> 48) & 0xFFFF,
         (display_value >> 32) & 0xFFFF,
@@ -1154,16 +1160,11 @@ def assert_title_cave_is_unused(
             raise PatchError(f"aligned ELF pointer at file offset {pos:#x} enters code cave")
 
 
-def make_patched_elf_for_title(
-    elf: bytes, product_code: str, profile_name: str = "v1.0"
-):
+def make_patched_elf_for_title(elf: bytes, product_code: str):
     """Build any supported title from the same verified patch plan."""
-    if profile_name not in PATCH_PROFILES:
-        raise PatchError(f"unknown patch profile: {profile_name}")
     if product_code not in TITLE_CONFIGS:
         raise PatchError(f"no title configuration for {product_code}")
     config = TITLE_CONFIGS[product_code]
-    profile = PATCH_PROFILES[profile_name]
     segment = parse_title_load_segment(elf, product_code)
     if sha256_bytes(elf) != config["elf_sha256"]:
         raise PatchError(f"unsupported or modified {config['title']} ELF")
@@ -1185,52 +1186,94 @@ def make_patched_elf_for_title(
         )
     else:
         display_helper = make_display_helper(
-            config.get("display_value", profile["display_value"]),
+            config.get("display_value", DEFAULT_DISPLAY_VALUE),
             config["display_cave_va"],
             config["display_hook_return_va"],
         )
-    crtc_helper, listing, table_va = build_crtc_helper(
-        config.get("timing_values", profile["timing_values"]),
-        config["crtc_cave_va"],
-    )
+    continuation_va = config.get("crtc_continuation_va")
+    if continuation_va is None:
+        crtc_helper, listing = build_crtc_helper(
+            config["crtc_cave_va"], config["setgscrt_wrapper_va"],
+        )
+        crtc_continuation = None
+    else:
+        full_helper, listing = build_crtc_helper(
+            config["crtc_cave_va"], config["setgscrt_wrapper_va"],
+            compact_first_guard=True, wrapper_call_va=continuation_va,
+        )
+        call_indices = [
+            index for index, (name, _word) in enumerate(listing)
+            if name == "jal original SetGsCrt wrapper"
+        ]
+        if (
+            len(call_indices) != 1 or call_indices[0] < 1
+            or listing[call_indices[0] - 1][0] != "ld ra,56(sp)"
+        ):
+            raise PatchError("5th CRTC split point is no longer the verified wrapper call")
+        call_index = call_indices[0]
+        prefix_end = (call_index - 1) * 4
+        crtc_helper = (
+            full_helper[:prefix_end]
+            + struct.pack("<I", encode_j(config["crtc_cave_va"] + prefix_end, continuation_va))
+            + full_helper[prefix_end : call_index * 4]
+        )
+        crtc_continuation = full_helper[call_index * 4 :]
     if len(display_helper) != config.get("display_helper_size", config["display_cave_size"]):
         raise PatchError(f"unexpected {config['title']} DISPLAY helper size")
     if len(crtc_helper) > config["crtc_cave_size"]:
         raise PatchError(f"{config['title']} CRTC helper exceeds its verified cave")
-    assert_title_cave_is_unused(
-        elf,
-        segment,
-        config,
-        config["display_cave_va"],
-        config["display_cave_size"],
-        require_executable=config.get("display_cave_executable", True),
-        scan_pointer_range=config.get("display_scan_pointer_range", True),
-    )
-    assert_title_cave_is_unused(
-        elf,
-        segment,
-        config,
-        config["crtc_cave_va"],
-        config["crtc_cave_size"],
-        require_executable=config.get("crtc_cave_executable", True),
-    )
-    if config.get("static_section_safety", True):
-        assert_cave_static_safety(
-            elf,
-            segment,
-            config["display_cave_va"],
-            config["display_cave_size"],
-            section_name=config.get("display_cave_section", ".rodata"),
+    if crtc_continuation is None:
+        assert_title_cave_is_unused(
+            elf, segment, config, config["display_cave_va"], config["display_cave_size"],
             require_executable=config.get("display_cave_executable", True),
+            scan_pointer_range=config.get("display_scan_pointer_range", True),
         )
-        assert_cave_static_safety(
-            elf,
-            segment,
-            config["crtc_cave_va"],
-            config["crtc_cave_size"],
-            section_name=config.get("crtc_cave_section", ".rodata"),
+        assert_title_cave_is_unused(
+            elf, segment, config, config["crtc_cave_va"], config["crtc_cave_size"],
             require_executable=config.get("crtc_cave_executable", True),
         )
+    else:
+        if len(crtc_continuation) != config["crtc_continuation_size"]:
+            raise PatchError("5th CRTC continuation exceeds its verified padding")
+        assert_title_cave_is_unused(
+            elf, segment, config, config["crtc_cave_va"],
+            len(crtc_helper) + len(display_helper),
+        )
+        assert_title_cave_is_unused(
+            elf, segment, config, continuation_va, len(crtc_continuation),
+        )
+    if config.get("static_section_safety", True):
+        if crtc_continuation is None:
+            assert_cave_static_safety(
+                elf,
+                segment,
+                config["display_cave_va"],
+                config["display_cave_size"],
+                section_name=config.get("display_cave_section", ".rodata"),
+                require_executable=config.get("display_cave_executable", True),
+            )
+            assert_cave_static_safety(
+                elf,
+                segment,
+                config["crtc_cave_va"],
+                config["crtc_cave_size"],
+                section_name=config.get("crtc_cave_section", ".rodata"),
+                require_executable=config.get("crtc_cave_executable", True),
+            )
+        else:
+            sections = parse_sections(elf)
+            data, rodata = sections[".data"], sections[".rodata"]
+            if not (
+                data[1] + data[3] == config["crtc_cave_va"]
+                and config["crtc_cave_va"] + len(crtc_helper) == config["display_cave_va"]
+                and config["display_cave_va"] + len(display_helper) == rodata[1]
+                and continuation_va + len(crtc_continuation)
+                    == config["crtc_continuation_end_va"]
+            ):
+                raise PatchError("5th split helpers no longer fit the audited section padding")
+            assert_cave_static_safety(
+                elf, segment, continuation_va, len(crtc_continuation),
+            )
 
     patched = bytearray(elf)
     rows = []
@@ -1294,7 +1337,7 @@ def make_patched_elf_for_title(
                 reset_va,
                 encode_j(reset_va, wrapper_va),
                 encode_j(reset_va, config["crtc_cave_va"]),
-                f"{config['title']} ResetGraph tail to BIOS-aware CRTC helper",
+                f"{config['title']} ResetGraph tail to BIOS-native CRTC helper",
             )
         )
         reset_delay_off = va_to_file_offset(reset_delay_va, 4, segment)
@@ -1339,10 +1382,10 @@ def make_patched_elf_for_title(
     if struct.unpack_from("<4I", elf, wrapper_off) != expected_wrapper:
         raise PatchError(f"{config['title']} SetGsCrt syscall wrapper preimage changed")
 
-    # The generated helper writes PMODE=0 to blank the circuits; it never reads
-    # PMODE back. IIDX later restores its own value from the display environment.
+    # BIOS SetGsCrt owns PMODE; the generated helper must never read it back.
+    crtc_machine_code = full_helper if crtc_continuation is not None else crtc_helper
     for offset in range(0, len(listing) * 4, 4):
-        word = struct.unpack_from("<I", crtc_helper, offset)[0]
+        word = struct.unpack_from("<I", crtc_machine_code, offset)[0]
         if (word >> 26) == 0x37 and ((word >> 21) & 31) == REG["t0"] and (word & 0xFFFF) == GS_PMODE_OFFSET:
             raise PatchError(f"generated {config['title']} CRTC helper unexpectedly reads GS PMODE")
 
@@ -1354,20 +1397,29 @@ def make_patched_elf_for_title(
         config["crtc_cave_va"], len(crtc_helper), segment, config
     )
     patched[crtc_off : crtc_off + len(crtc_helper)] = crtc_helper
+    if crtc_continuation is not None:
+        continuation_off = title_patch_va_to_file_offset(
+            continuation_va, len(crtc_continuation), segment, config
+        )
+        patched[continuation_off : continuation_off + len(crtc_continuation)] = crtc_continuation
     rows.extend(
         (
             (config["display_cave_va"], bytes(len(display_helper)), display_helper, f"{config['title']} DISPLAY helper"),
-            (config["crtc_cave_va"], bytes(len(crtc_helper)), crtc_helper, f"{config['title']} BIOS-aware CRTC helper and value table"),
+            (config["crtc_cave_va"], bytes(len(crtc_helper)), crtc_helper, f"{config['title']} BIOS-native CRTC helper"),
         )
     )
-    return bytes(patched), rows, listing, table_va
-
-
-def make_patched_elf_profiled_title(
-    elf: bytes, product_code: str, profile_name: str = "v1.0"
-):
-    """Keep the API used by existing IIDX 8th diagnostic scripts."""
-    return make_patched_elf_for_title(elf, product_code, profile_name)
+    if crtc_continuation is not None:
+        rows.append((
+            continuation_va, bytes(len(crtc_continuation)), crtc_continuation,
+            f"{config['title']} CRTC continuation",
+        ))
+    for protected_va, protected_size in config.get("protected_ranges", ()):
+        protected_off = va_to_file_offset(protected_va, protected_size, segment)
+        if patched[protected_off : protected_off + protected_size] != elf[
+            protected_off : protected_off + protected_size
+        ]:
+            raise PatchError(f"{config['title']} protected data changed at {protected_va:#x}")
+    return bytes(patched), rows, listing
 
 
 def merge_ranges(ranges: list[tuple[int, int]]) -> list[tuple[int, int]]:
@@ -1433,8 +1485,7 @@ def check_output_space(output_dir: Path, output_size: int) -> int:
 def build(
     source: Path,
     output: Path,
-    profile_name: str = "v1.0",
-) -> tuple[str, str, str, int, list[tuple[str, int]], str, int]:
+) -> tuple[str, str, str, int, list[tuple[str, int]], str]:
     source = source.resolve()
     output = output.resolve()
     partial = output.with_name(output.name + ".partial")
@@ -1452,14 +1503,19 @@ def build(
 
     elf_iso_offset, elf_size, original_elf, product_code = locate_boot_elf(source)
     segment = parse_title_load_segment(original_elf, product_code)
-    patched_elf, patch_rows, listing, table_va = make_patched_elf_for_title(
-        original_elf, product_code, profile_name
-    )
+    patched_elf, patch_rows, listing = make_patched_elf_for_title(original_elf, product_code)
     patched_elf_hash = sha256_bytes(patched_elf)
     title_config = TITLE_CONFIGS[product_code]
     expected_patched_hash = title_config["patched_elf_sha256"]
     if expected_patched_hash is not None and patched_elf_hash != expected_patched_hash:
         raise PatchError(f"generated patched ELF hash is unexpected: {patched_elf_hash}")
+
+    audio_config = title_config.get("audio_timer_irx")
+    if audio_config is not None:
+        irx_iso_offset, original_irx = locate_iso_member(
+            source, audio_config["path"], audio_config["size"]
+        )
+        patched_irx, irx_rows = make_patched_iop_irx(original_irx, audio_config)
 
     iso_ranges = []
     for va, _before, _after, _reason in patch_rows:
@@ -1467,6 +1523,8 @@ def build(
         length = len(_after)
         elf_off = title_patch_va_to_file_offset(va, length, segment, title_config)
         iso_ranges.append((elf_iso_offset + elf_off, length))
+    if audio_config is not None:
+        iso_ranges.extend((irx_iso_offset + offset, len(after)) for offset, after in irx_rows)
     merge_ranges(iso_ranges)
 
     published = False
@@ -1485,13 +1543,21 @@ def build(
         with partial.open("r+b") as stream:
             stream.seek(elf_iso_offset)
             stream.write(patched_elf)
+            if audio_config is not None:
+                for offset, after in irx_rows:
+                    stream.seek(irx_iso_offset + offset)
+                    stream.write(after)
             stream.flush()
             os.fsync(stream.fileno())
 
         with partial.open("rb") as stream:
             written_elf = read_at(stream, elf_iso_offset, elf_size)
+            if audio_config is not None:
+                written_irx = read_at(stream, irx_iso_offset, len(original_irx))
         if written_elf != patched_elf:
             raise PatchError("patched boot ELF failed byte verification")
+        if audio_config is not None and written_irx != patched_irx:
+            raise PatchError("patched 5th IOP_MAIN.IRX failed byte verification")
         for va, _before, after, _reason in patch_rows:
             elf_off = title_patch_va_to_file_offset(
                 va, len(after), segment, title_config
@@ -1521,20 +1587,34 @@ def build(
             raise PatchError("final ISO BOOT2 verification failed")
         if expected_patched_hash is not None and sha256_bytes(out_elf) != expected_patched_hash:
             raise PatchError("final patched boot ELF hash verification failed")
+        if audio_config is not None:
+            out_irx_offset, out_irx = locate_iso_member(
+                output, audio_config["path"], audio_config["size"]
+            )
+            if out_irx_offset != irx_iso_offset or out_irx != patched_irx:
+                raise PatchError("final 5th IOP_MAIN.IRX verification failed")
         crtc_payloads = [
             after for va, _before, after, _reason in patch_rows
             if va == title_config["crtc_cave_va"]
         ]
         if len(crtc_payloads) != 1:
             raise PatchError("generated patch is missing its unique CRTC helper")
+        crtc_size = len(crtc_payloads[0])
+        if "crtc_continuation_va" in title_config:
+            continuation_payloads = [
+                after for va, _before, after, _reason in patch_rows
+                if va == title_config["crtc_continuation_va"]
+            ]
+            if len(continuation_payloads) != 1:
+                raise PatchError("generated patch is missing its CRTC continuation")
+            crtc_size += len(continuation_payloads[0])
         return (
             source_hash_after,
             output_hash,
             sha256_bytes(out_elf),
-            len(crtc_payloads[0]),
+            crtc_size,
             listing,
             product_code,
-            table_va,
         )
     except Exception:
         partial.unlink(missing_ok=True)
@@ -1549,17 +1629,13 @@ def main() -> int:
     parser.add_argument("--output", type=Path, help="new output ISO path; refuses to overwrite existing files")
     args = parser.parse_args()
     try:
-        output_arg = args.output or args.source.with_name(args.source.stem + "_480p_v1.0.iso")
-        source_hash, output_hash, elf_hash, helper_size, _listing, product_code, table_va = build(
-            args.source, output_arg, "v1.0"
-        )
+        output_arg = args.output or args.source.with_name(args.source.stem + "_480p_bios_native_526_trial.iso")
+        source_hash, output_hash, elf_hash, helper_size, _listing, product_code = build(args.source, output_arg)
         output = output_arg.resolve()
         title_config = TITLE_CONFIGS[product_code]
-        profile = PATCH_PROFILES["v1.0"]
-        timing_values = title_config.get("timing_values", profile["timing_values"])
         cave_va = title_config["crtc_cave_va"]
         print(f"TITLE={title_config['title']}")
-        print(f"STATE={title_config['state']}")
+        print(f"STATE={title_config.get('hardware_status', PATCH_STATE)}")
         print(f"SOURCE={args.source.resolve()}")
         print(f"SOURCE_SHA256={source_hash}")
         print(f"OUTPUT={output}")
@@ -1568,7 +1644,8 @@ def main() -> int:
         print(f"PATCHED_ELF_SHA256={elf_hash}")
         print(f"CRTC_HELPER_VA={cave_va:#010x}")
         print(f"CRTC_HELPER_SIZE={helper_size}")
-        print(f"CRTC_TABLE_VA={table_va:#010x}")
+        if "crtc_continuation_va" in title_config:
+            print(f"CRTC_CONTINUATION_VA={title_config['crtc_continuation_va']:#010x}")
         if title_config.get("display_mode") == "dynamic_240_or_224_rows":
             if title_config.get("display_only_256_rows", False):
                 print("DISPLAY_MODE=guarded: DH 255->479 when MAGV=0; all other modes pass through")
@@ -1582,19 +1659,28 @@ def main() -> int:
                 print("DISPLAY_HORIZONTAL=DX:312,MAGH:1,DW:1279 only for input MAGV=0,DH=255")
             print("DISPLAY_VALUE=read from the live IIDX display environment")
         else:
-            display_value = title_config.get("display_value", profile["display_value"])
+            display_value = title_config.get("display_value", DEFAULT_DISPLAY_VALUE)
             print(f"DISPLAY_VALUE={display_value:#018x}")
             dx, dy, magh, magv, dw, dh = decode_display_value(display_value)
             print(
                 f"DISPLAY_FIELDS=DX:{dx},DY:{dy},MAGH:{magh},MAGV:{magv},DW:{dw},DH:{dh},"
                 f"source_rows:{(dh + 1) // (magv + 1)}"
             )
-        print(f"SYNCV={timing_values[-1]:#018x}")
+        print(f"SYNCV_480P={BIOS_NATIVE_SYNCV_526:#018x}")
+        if "audio_timer_irx" in title_config:
+            print("AUDIO_IOP_TIMER=5th HLINE intervals 80->160 (PS2 hardware PASS)")
+            print(f"PATCHED_IOP_IRX_SHA256={title_config['audio_timer_irx']['patched_sha256']}")
         print("BIOS_OSD_COLOR=preserved at runtime; no fixed RGB/component selection")
         print("PMODE=runtime game display-env restore; no GS PMODE readback")
-        print("HARDWARE_VALIDATION=not performed by this tool")
+        if "hardware_status" in title_config:
+            print("HARDWARE_VALIDATION=5th profile user-confirmed on PS2; this tool does not test newly generated ISOs")
+        else:
+            print("HARDWARE_VALIDATION=not performed by this tool")
         print("INPUT=ISO9660 SYSTEM.CNF BOOT2 extent discovered dynamically; full-ISO hash is informational")
-        print("VERIFIED=ELF allowlist, MIPS preimages, code caves, patched ELF hash, and non-patch ISO bytes")
+        verified = "ELF allowlist, MIPS preimages, code caves, patched ELF hash, and non-patch ISO bytes"
+        if "audio_timer_irx" in title_config:
+            verified += ", patched IOP IRX hash"
+        print(f"VERIFIED={verified}")
         return 0
     except (PatchError, OSError, struct.error, UnicodeError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
