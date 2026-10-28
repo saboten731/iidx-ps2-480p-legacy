@@ -126,14 +126,25 @@ class PatchProfileTests(unittest.TestCase):
             self.assertFalse(Path(str(output) + ".partial").exists())
 
     def test_crtc_helpers_fit_and_never_read_pmode(self):
-        default_timing = patch480p.PATCH_PROFILES["v1.0"]["timing_values"]
         for product_code, config in patch480p.TITLE_CONFIGS.items():
             with self.subTest(product_code=product_code):
-                cave_va = config.get("crtc_cave_va", patch480p.CRTC_CAVE_VA)
-                cave_size = config.get("crtc_cave_size", patch480p.CRTC_CAVE_SIZE)
-                timing = config.get("timing_values", default_timing)
-                helper, listing, _table_va = patch480p.build_crtc_helper(timing, cave_va)
-                self.assertLessEqual(len(helper), cave_size)
+                split = "crtc_continuation_va" in config
+                helper, listing = patch480p.build_crtc_helper(
+                    config["crtc_cave_va"], config["setgscrt_wrapper_va"],
+                    compact_first_guard=split,
+                    wrapper_call_va=config.get("crtc_continuation_va"),
+                )
+                self.assertEqual(len(helper), 176 if split else 180)
+                if split:
+                    self.assertEqual(
+                        len(helper) + 4,
+                        config["crtc_cave_size"] + config["crtc_continuation_size"],
+                    )
+                else:
+                    self.assertLessEqual(len(helper), config["crtc_cave_size"])
+                self.assertEqual(
+                    sum(name.startswith("sd t1,0x60") for name, _ in listing), 1
+                )
 
                 for offset in range(0, len(listing) * 4, 4):
                     word = struct.unpack_from("<I", helper, offset)[0]

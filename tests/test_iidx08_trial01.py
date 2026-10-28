@@ -171,10 +171,10 @@ class EighthStyleTrial02Tests(unittest.TestCase):
                 self.assertEqual(word(va), expected)
 
         self.assertEqual(self.config["crtc_cave_va"] + self.config["crtc_cave_size"], self.va)
-        crtc, _, _ = patch480p.build_crtc_helper(
-            self.config["timing_values"], self.config["crtc_cave_va"]
+        crtc, _ = patch480p.build_crtc_helper(
+            self.config["crtc_cave_va"], self.config["setgscrt_wrapper_va"]
         )
-        self.assertEqual(len(crtc), 0xF8)
+        self.assertEqual(len(crtc), 180)
         for kind in ("display", "crtc"):
             patch480p.assert_title_cave_is_unused(
                 elf, segment, self.config,
@@ -182,7 +182,7 @@ class EighthStyleTrial02Tests(unittest.TestCase):
                 self.config[kind + "_cave_size"],
             )
 
-        patched, rows, _, _ = patch480p.make_patched_elf_profiled_title(elf, code)
+        patched, rows, _ = patch480p.make_patched_elf_for_title(elf, code)
         self.assertEqual(patch480p.sha256_bytes(patched),
                          self.config["patched_elf_sha256"])
         self.assertEqual({row[0] for row in rows}, {

@@ -180,13 +180,11 @@ class SeventhStyleTrialTests(unittest.TestCase):
         branch_imm = word(source_va) & 0xFFFF
         branch_imm -= 0x10000 if branch_imm & 0x8000 else 0
         self.assertEqual(source_va + 4 + (branch_imm << 2), 0x002D845C)
-        crtc, _, _ = patch480p.build_crtc_helper(
-            self.config["timing_values"], self.config["crtc_cave_va"],
+        crtc, _ = patch480p.build_crtc_helper(
+            self.config["crtc_cave_va"], self.config["setgscrt_wrapper_va"],
         )
-        self.assertEqual(len(crtc), 0xF4)
-        patched, rows, _, _ = patch480p.make_patched_elf_profiled_title(
-            elf, code, "v1.0",
-        )
+        self.assertEqual(len(crtc), 180)
+        patched, rows, _ = patch480p.make_patched_elf_for_title(elf, code)
         self.assertEqual(patch480p.sha256_bytes(patched),
                          self.config["patched_elf_sha256"])
         guard_offset = patch480p.va_to_file_offset(0x002D845C, 8, segment)

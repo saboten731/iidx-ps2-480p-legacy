@@ -47,9 +47,7 @@ class Iidx06Display2HookFixTests(unittest.TestCase):
             0x001AA040, 0x001AA044, 0xFCA30000, 0xDE020020,
             0x18, 0x001AA048, "v1", "a1",
         ))
-        patched, _, _, _ = patch480p.make_patched_elf_profiled_title(
-            self.elf, "SLPM_651.56", "v1.0"
-        )
+        patched, _, _ = patch480p.make_patched_elf_for_title(self.elf, "SLPM_651.56")
         for va in (0x001AA038, 0x001AA03C, 0x001AA044, 0x001AA048):
             offset = patch480p.va_to_file_offset(va, 4, self.segment)
             self.assertEqual(struct.unpack_from("<I", patched, offset)[0], original[va])

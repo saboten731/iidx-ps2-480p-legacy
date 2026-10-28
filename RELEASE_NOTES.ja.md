@@ -1,32 +1,34 @@
-# beatmania IIDX（PS2）— 480pパッチ v1.1
+# beatmania IIDX（PS2）— 480pパッチ v1.2
 
 [English](RELEASE_NOTES.md) | **日本語**
 
-PS2版『beatmania IIDX』の480pパッチを、従来の**3rd styleから3rd〜8th styleの6作品**へ拡張しました。今回新たに追加した**4th・5th・6th・7th・8th style**は、すべてPS2実機で動作確認済みです。
+PS2版『beatmania IIDX 3rd〜8th style』の**6作品すべて**について、共通のBIOS-native 480p方式へ更新しました。**全作品でPS2実機による映像・音声・演奏動作を確認済み**です。
 
 ### 主な変更点
 
-- **4th〜8th style** の480p出力に対応しました。
-- 作品ごとに映像の出力方式と表示位置を調整し、実機で画面表示と演奏動作を確認しました。
+- **3rd〜8th style** を共通のBIOS-native 480p出力方式へ更新し、作品ごとの表示調整を反映しました。
+- **5th styleの480p時の音声再生不具合を修正しました。** v1.1では左右で異なるBGMが鳴る、メニューSEが正しく再生されない等の問題がありました。v1.2では`IOP_MAIN.IRX`のHLINEタイマー間隔2か所を補正し、実機で左右の正常な音声再生と音ズレのない演奏を確認しました。
 - ゲーム本来の描画解像度は維持します。**480p出力であり、ネイティブ640×480描画ではありません。**
-- **3rd styleに変更はありません。** 引き続き [v1.0](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.0) から入手できます。
+
+**5th styleをご利用の方へ：** 旧v1.1のxdeltaには、検証環境で確認された音声不具合があります。**未改変ISOにv1.2を適用**してください。旧パッチを重ねて適用しないでください。
 
 ### ダウンロード
 
 | 作品 | パッチ |
 |---|---|
-| 4th style | [`IIDX04_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.1/IIDX04_480p.xdelta) |
-| 5th style | [`IIDX05_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.1/IIDX05_480p.xdelta) |
-| 6th style | [`IIDX06_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.1/IIDX06_480p.xdelta) |
-| 7th style | [`IIDX07_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.1/IIDX07_480p.xdelta) |
-| 8th style | [`IIDX08_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.1/IIDX08_480p.xdelta) |
+| 3rd style | [`IIDX03_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.2/IIDX03_480p.xdelta) |
+| 4th style | [`IIDX04_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.2/IIDX04_480p.xdelta) |
+| 5th style | [`IIDX05_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.2/IIDX05_480p.xdelta) |
+| 6th style | [`IIDX06_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.2/IIDX06_480p.xdelta) |
+| 7th style | [`IIDX07_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.2/IIDX07_480p.xdelta) |
+| 8th style | [`IIDX08_480p.xdelta`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.2/IIDX08_480p.xdelta) |
 
-元ISOのハッシュ・適用後ISOのハッシュ・配布パッチのハッシュは [`checksums.txt`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.1/checksums.txt) で確認できます。xdeltaは**ハッシュが一致する基準ISO専用**です。ISOやゲームデータは配布していません。
-
-元ISOのハッシュが異なっていても、対応する未改変のゲーム実行ファイルが一致する場合は、[リポジトリの `patch480p.py`](https://github.com/saboten731/iidx-ps2-480p-legacy/blob/main/patch480p.py) を利用できます。適用方法は [日本語README](https://github.com/saboten731/iidx-ps2-480p-legacy/blob/main/README.ja.md) を参照してください。
+元ISO・適用後ISO・xdeltaのSHA-256は[`checksums.txt`](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/download/v1.2/checksums.txt)で確認できます。xdeltaは**一致する基準ISO専用**です。元ISO全体のハッシュが異なる場合は、対応する未改変実行ファイルを対象とする[`patch480p.py`](https://github.com/saboten731/iidx-ps2-480p-legacy/blob/main/patch480p.py)も利用できます。**5th styleでは未改変`IOP_MAIN.IRX`の一致も必要**です。手順は[日本語README](https://github.com/saboten731/iidx-ps2-480p-legacy/blob/main/README.ja.md)を参照してください。ISOやゲームデータは配布していません。
 
 ### 実機検証・注意事項
 
-追加した5作品は、PS2実機・OPL／MX4SIO・D端子（コンポーネント）接続・**GSM OFF**で、映像表示と演奏動作を確認しました。ほかの接続環境や起動方法では動作が異なる場合があります。**RGB接続は実機未検証**であり、すべての楽曲や長時間動作を全作品で網羅したものではありません。
+日本版SCPH-77000、OPL（MX4SIO／USB）、D端子（コンポーネント）直結、**GSM OFF**で全6作品の映像・音声・演奏動作を確認しました。**RGB接続は実機未検証**です。その他のPS2型番、起動環境、全楽曲・長時間動作を網羅した検証ではありません。
+
+過去の[v1.0](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.0)・[v1.1](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.1)は履歴として残しています。**現在の推奨版はv1.2です。**
 
 本パッチは非公式であり、KONAMIから承認・支援を受けていません。ゲーム本体・素材・商標の権利は各権利者に帰属します。
