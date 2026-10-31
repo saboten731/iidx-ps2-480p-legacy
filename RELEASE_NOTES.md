@@ -1,6 +1,17 @@
-# beatmania IIDX (PS2) — 480p Patch v1.2
+# beatmania IIDX (PS2) — 480p Patch Release Notes
 
 **English** | [日本語](RELEASE_NOTES.ja.md)
+
+## v1.21
+
+- Corrected the reference ISO for **6th style** to match the [Redump record](https://redump.info/disc/35599/) and updated the xdelta and Python patcher.
+- Confirmed 480p video, audio and gameplay on a physical PS2. Other game patches are unchanged.
+
+[Download v1.21](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.21)
+
+---
+
+## v1.2
 
 v1.2 updates the 480p patches for **all six PS2 games, 3rd–8th style**, with the new shared BIOS-native 480p output method. **All six were tested on a physical PS2**, including video, audio and gameplay.
 
@@ -29,6 +40,6 @@ Use [`checksums.txt`](https://github.com/saboten731/iidx-ps2-480p-legacy/release
 
 Tested on a Japanese SCPH-77000 via OPL (MX4SIO / USB), a component (D-terminal) connection and **GSM disabled**. Video, audio and gameplay were checked for all six games. **RGB output has not been hardware-tested**, and other console models, setups and every song/extended play have not been exhaustively checked.
 
-The earlier [v1.0](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.0) and [v1.1](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.1) releases remain archived; **v1.2 is the recommended version**.
+The earlier [v1.0](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.0) and [v1.1](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.1) releases remain archived.
 
 This is an unofficial patch, neither endorsed nor supported by KONAMI. All game rights and trademarks remain with their owners.

@@ -175,6 +175,8 @@ TITLE_CONFIGS = {
     },
     "SLPM_651.56": {
         "title": "IIDX 6th Style",
+        "patch_state": "6TH_REDUMP_SOURCE_HARDWARE_PENDING",
+        "original_iso_sha256": "91E22FBCB7B5097F0D4D56A6D79ADB66BFBDBA8F01E8AE6DDF6D507F3A1336E0",
         "elf_sha256": "4C58566CD7D5E5F0EBA377615EB27FA87E8E2EA99C10673D619DCF4693EA751B",
         "patched_elf_sha256": "2A836F77EEE906526834BC1F2C24DB47CEC881FC6948A659DA794D5AC0ACC3B3",
         "load_segments": (
@@ -1530,6 +1532,12 @@ def build(
     published = False
     try:
         source_hash_before = sha256_file(source)
+        expected_source_hash = title_config.get("original_iso_sha256")
+        if expected_source_hash is not None and source_hash_before != expected_source_hash:
+            raise PatchError(
+                f"unsupported {title_config['title']} original ISO SHA-256 "
+                f"{source_hash_before}; expected {expected_source_hash}"
+            )
         copied = hashlib.sha256()
         with source.open("rb") as src, partial.open("xb") as dst:
             while chunk := src.read(8 * 1024 * 1024):
@@ -1635,7 +1643,7 @@ def main() -> int:
         title_config = TITLE_CONFIGS[product_code]
         cave_va = title_config["crtc_cave_va"]
         print(f"TITLE={title_config['title']}")
-        print(f"STATE={title_config.get('hardware_status', PATCH_STATE)}")
+        print(f"STATE={title_config.get('patch_state', title_config.get('hardware_status', PATCH_STATE))}")
         print(f"SOURCE={args.source.resolve()}")
         print(f"SOURCE_SHA256={source_hash}")
         print(f"OUTPUT={output}")
@@ -1676,8 +1684,13 @@ def main() -> int:
             print("HARDWARE_VALIDATION=5th profile user-confirmed on PS2; this tool does not test newly generated ISOs")
         else:
             print("HARDWARE_VALIDATION=not performed by this tool")
-        print("INPUT=ISO9660 SYSTEM.CNF BOOT2 extent discovered dynamically; full-ISO hash is informational")
+        if "original_iso_sha256" in title_config:
+            print("INPUT=ISO9660 SYSTEM.CNF BOOT2 extent discovered dynamically; full-ISO SHA-256 required")
+        else:
+            print("INPUT=ISO9660 SYSTEM.CNF BOOT2 extent discovered dynamically; full-ISO hash is informational")
         verified = "ELF allowlist, MIPS preimages, code caves, patched ELF hash, and non-patch ISO bytes"
+        if "original_iso_sha256" in title_config:
+            verified += ", original full-ISO hash"
         if "audio_timer_irx" in title_config:
             verified += ", patched IOP IRX hash"
         print(f"VERIFIED={verified}")
