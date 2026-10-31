@@ -1,6 +1,17 @@
-# beatmania IIDX（PS2）— 480pパッチ v1.2
+# beatmania IIDX（PS2）— 480pパッチ 更新履歴
 
 [English](RELEASE_NOTES.md) | **日本語**
+
+## v1.21
+
+- **6th style**の基準ISOを[Redump登録データ](https://redump.info/disc/35599/)と一致するものに修正し、xdeltaとPython版パッチャーを更新しました。
+- PS2実機で480p映像・音声・演奏動作を確認済みです。他作品のパッチに変更はありません。
+
+[v1.21をダウンロード](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.21)
+
+---
+
+## v1.2
 
 PS2版『beatmania IIDX 3rd〜8th style』の**6作品すべて**について、共通のBIOS-native 480p方式へ更新しました。**全作品でPS2実機による映像・音声・演奏動作を確認済み**です。
 
@@ -29,6 +40,6 @@ PS2版『beatmania IIDX 3rd〜8th style』の**6作品すべて**について、
 
 日本版SCPH-77000、OPL（MX4SIO／USB）、D端子（コンポーネント）直結、**GSM OFF**で全6作品の映像・音声・演奏動作を確認しました。**RGB接続は実機未検証**です。その他のPS2型番、起動環境、全楽曲・長時間動作を網羅した検証ではありません。
 
-過去の[v1.0](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.0)・[v1.1](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.1)は履歴として残しています。**現在の推奨版はv1.2です。**
+過去の[v1.0](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.0)・[v1.1](https://github.com/saboten731/iidx-ps2-480p-legacy/releases/tag/v1.1)は履歴として残しています。
 
 本パッチは非公式であり、KONAMIから承認・支援を受けていません。ゲーム本体・素材・商標の権利は各権利者に帰属します。
